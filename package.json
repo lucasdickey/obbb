@@ -11,6 +11,7 @@
     "type-check": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
+    "fetch-hr1-data": "tsx scripts/fetch-hr1-data.ts",
     "ingest": "tsx scripts/chunk_and_embed.ts",
     "ingest:dry-run": "tsx scripts/chunk_and_embed.ts --dry-run"
   },
