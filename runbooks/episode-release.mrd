@@ -1,0 +1,14 @@
+# Episode Release Runbook (.mrd)
+
+## Purpose
+Checklist for manual or automated release of a new podcast episode.
+
+## Checklist
+- [ ] Confirm story, audio, description, and artwork are generated and stored
+- [ ] Validate episode appears in the web app (UI/UX check)
+- [ ] Validate episode appears in the RSS feed (and passes RSS validator)
+- [ ] Announce or syndicate the new episode (if desired)
+- [ ] Archive or back up assets as needed
+
+## Notes
+- Use this checklist for both automated and manual releases to ensure nothing is missed.

@@ -1,0 +1,17 @@
+# Pre-Merge Check Runbook (.mrd)
+
+## Purpose
+Ensure every branch is thoroughly validated before merging.
+
+## Checklist
+- [ ] All code builds and runs locally
+- [ ] Run `vercel build` (or Vercel SDK local build) to simulate production
+- [ ] All tests and linters pass (`npm run test`, `npm run lint`, `tsc --noEmit`)
+- [ ] Review all new/changed files for clarity and completeness
+- [ ] Write a thorough, descriptive commit message
+- [ ] Update AGENTS.md and/or TASKS.md if any practices or requirements have changed
+- [ ] Validate the RSS feed (if episode or feed changes)
+- [ ] Ensure documentation is up to date
+
+## Notes
+- Only merge after all items are checked and confirmed.

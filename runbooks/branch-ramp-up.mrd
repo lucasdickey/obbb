@@ -1,0 +1,16 @@
+# Branch Ramp-Up Runbook (.mrd)
+
+## Purpose
+Standardize the process for starting a new feature/episode branch to ensure atomic, high-quality contributions.
+
+## Checklist
+- [ ] Name your branch clearly (e.g., `feature/episode-<date>` or `feature/<short-description>`)
+- [ ] Sync with the latest `main` branch before starting
+- [ ] Review AGENTS.md and TASKS.md for any recent updates
+- [ ] If requirements or best practices have changed, update AGENTS.md and/or TASKS.md before proceeding
+- [ ] Set up your local environment and run all tests/builds to confirm a clean slate
+- [ ] Plan your work in logical, testable task groups
+- [ ] Document any assumptions or open questions at the top of your branch's PR or issue
+
+## Notes
+- Use this runbook every time you begin a new branch to ensure consistency and quality.

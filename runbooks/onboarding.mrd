@@ -1,0 +1,15 @@
+# Onboarding Runbook (.mrd)
+
+## Purpose
+Help new contributors ramp up quickly and follow project standards.
+
+## Steps
+- [ ] Read AGENTS.md and TASKS.md to understand the stack, workflow, and best practices
+- [ ] Set up your local environment (Node.js, npm, Vercel CLI, etc.)
+- [ ] Clone the repository and run `npm install`
+- [ ] Request access to required secrets and configuration (GitHub Actions secrets, Vercel, API keys)
+- [ ] Run tests and builds locally to confirm setup
+- [ ] Review runbooks in `/runbooks` for workflow guidance
+
+## Notes
+- Don’t hesitate to ask questions or suggest improvements to documentation!
