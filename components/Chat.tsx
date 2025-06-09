@@ -9,6 +9,8 @@ import {
   CheckCircle,
   AlertCircle,
   Info,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 interface ChatMessage {
@@ -495,9 +497,10 @@ function AIResponse({
                         ...{" "}
                         <button
                           onClick={() => toggleSourceExpanded(source.id)}
-                          className="text-blue-600 hover:text-blue-800 underline"
+                          className="inline-flex items-center text-gray-600 hover:text-black hover:bg-gray-100 rounded p-1 ml-1"
+                          title="Show more"
                         >
-                          show more
+                          <ChevronDown className="h-3 w-3" />
                         </button>
                       </>
                     )}
@@ -506,9 +509,10 @@ function AIResponse({
                         {" "}
                         <button
                           onClick={() => toggleSourceExpanded(source.id)}
-                          className="text-blue-600 hover:text-blue-800 underline"
+                          className="inline-flex items-center text-gray-600 hover:text-black hover:bg-gray-100 rounded p-1 ml-1"
+                          title="Show less"
                         >
-                          show less
+                          <ChevronUp className="h-3 w-3" />
                         </button>
                       </>
                     )}
