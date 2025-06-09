@@ -139,43 +139,56 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-gray-900">
-            HR1 Q&A Assistant
-          </h1>
-          <p className="text-sm text-gray-500">
-            Ask questions about the "One Big Beautiful Bill Act"
-          </p>
+    <div className="flex flex-col h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {/* Header with gradient */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg">
+        <div className="backdrop-blur-sm bg-white/90 border-b border-white/20 px-6 py-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              HR1 Q&A Assistant
+            </h1>
+            <p className="text-sm text-slate-600 font-medium">
+              Ask questions about the "One Big Beautiful Bill Act"
+            </p>
+          </div>
+          <button
+            onClick={clearChat}
+            className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-white/50 rounded-lg transition-all duration-200 border border-slate-200 hover:shadow-md disabled:opacity-50"
+            disabled={messages.length === 0}
+          >
+            Clear Chat
+          </button>
         </div>
-        <button
-          onClick={clearChat}
-          className="px-3 py-1 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
-          disabled={messages.length === 0}
-        >
-          Clear Chat
-        </button>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+      {/* Messages with enhanced styling */}
+      <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6">
         {messages.length === 0 && (
-          <div className="text-center py-12">
-            <div className="bg-blue-50 rounded-lg p-6 mx-auto max-w-md">
-              <Info className="h-8 w-8 text-blue-500 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <div className="text-center py-16">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-8 mx-auto max-w-lg shadow-xl">
+              <div className="bg-gradient-to-br from-blue-500 to-purple-500 rounded-full p-3 w-16 h-16 mx-auto mb-6 shadow-lg">
+                <Info className="h-10 w-10 text-white mx-auto" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-3">
                 Welcome to HR1 Q&A
               </h3>
-              <p className="text-gray-600 text-sm mb-4">
+              <p className="text-slate-600 mb-6 leading-relaxed">
                 Ask me anything about the HR1 "One Big Beautiful Bill Act" - tax
                 relief, border security, energy policy, healthcare, and more.
               </p>
-              <div className="text-xs text-gray-500 space-y-1">
-                <p>• "What does HR1 say about tax relief?"</p>
-                <p>• "How does HR1 address border security?"</p>
-                <p>• "What are the energy provisions in HR1?"</p>
+              <div className="text-sm text-slate-500 space-y-2 bg-white/50 rounded-lg p-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                  <p>"What does HR1 say about tax relief?"</p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                  <p>"How does HR1 address border security?"</p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-indigo-400 rounded-full"></div>
+                  <p>"What are the energy provisions in HR1?"</p>
+                </div>
               </div>
             </div>
           </div>
@@ -184,52 +197,64 @@ export default function Chat() {
         {messages.map((message, index) => (
           <div
             key={index}
-            className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} transition-all duration-300 ease-out`}
           >
             <div
-              className={`max-w-3xl w-full ${
+              className={`max-w-4xl w-full transform transition-all duration-300 hover:scale-[1.01] ${
                 message.role === "user"
-                  ? "bg-blue-600 text-white"
+                  ? "bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg hover:shadow-xl"
                   : message.error
-                    ? "bg-red-50 border border-red-200"
-                    : "bg-white border border-gray-200"
-              } rounded-lg px-4 py-3 shadow-sm`}
+                    ? "bg-gradient-to-br from-red-50 to-pink-50 border border-red-200 shadow-lg"
+                    : "bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl"
+              } rounded-2xl px-6 py-4`}
             >
               {/* Message Content */}
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   {message.processing ? (
-                    <div className="flex items-center space-x-2">
-                      <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                      <span className="text-gray-600">{message.content}</span>
+                    <div className="flex items-center space-x-3">
+                      <div className="bg-gradient-to-r from-blue-400 to-purple-500 rounded-full p-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-white" />
+                      </div>
+                      <span className="text-slate-700 font-medium">
+                        {message.content}
+                      </span>
                     </div>
                   ) : message.error ? (
-                    <div className="flex items-center space-x-2">
-                      <AlertCircle className="h-4 w-4 text-red-500" />
-                      <span className="text-red-700">{message.content}</span>
+                    <div className="flex items-center space-x-3">
+                      <div className="bg-gradient-to-r from-red-400 to-pink-500 rounded-full p-2">
+                        <AlertCircle className="h-4 w-4 text-white" />
+                      </div>
+                      <span className="text-red-700 font-medium">
+                        {message.content}
+                      </span>
                     </div>
                   ) : (
                     <div
-                      className={`whitespace-pre-wrap ${message.role === "user" ? "text-white" : "text-gray-900"}`}
+                      className={`whitespace-pre-wrap leading-relaxed ${
+                        message.role === "user"
+                          ? "text-white font-medium"
+                          : "text-slate-800"
+                      }`}
                     >
                       {message.content}
                     </div>
                   )}
                 </div>
 
-                {/* Copy Button */}
+                {/* Enhanced Copy Button */}
                 {!message.processing && !message.error && (
                   <button
                     onClick={() => copyToClipboard(message.content, `${index}`)}
-                    className={`ml-2 p-1 rounded hover:bg-gray-100 ${
+                    className={`ml-3 p-2 rounded-lg transition-all duration-200 ${
                       message.role === "user"
-                        ? "text-blue-200 hover:text-blue-100"
-                        : "text-gray-400 hover:text-gray-600"
+                        ? "text-blue-100 hover:text-white hover:bg-white/20"
+                        : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
                     }`}
                     title="Copy message"
                   >
                     {copied === `${index}` ? (
-                      <CheckCircle className="h-4 w-4" />
+                      <CheckCircle className="h-4 w-4 animate-pulse" />
                     ) : (
                       <Copy className="h-4 w-4" />
                     )}
@@ -237,37 +262,43 @@ export default function Chat() {
                 )}
               </div>
 
-              {/* Citations */}
+              {/* Enhanced Citations */}
               {message.sources && message.sources.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">
-                    Sources from HR1 Bill:
+                <div className="mt-6 pt-6 border-t border-slate-200">
+                  <h4 className="text-sm font-semibold text-slate-700 mb-4 flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full"></div>
+                    <span>Sources from HR1 Bill</span>
                   </h4>
-                  <div className="space-y-2">
+                  <div className="grid gap-3">
                     {message.sources.map((source, sourceIndex) => (
                       <div
                         key={source.id}
-                        className="bg-gray-50 rounded p-3 text-sm"
+                        className="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-xl p-4 text-sm hover:shadow-md transition-all duration-200"
                       >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-medium text-gray-700">
-                            [{sourceIndex + 1}] {source.section || "HR1 Bill"}
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-semibold text-slate-700 flex items-center space-x-2">
+                            <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
+                              <span className="text-white text-xs font-bold">
+                                {sourceIndex + 1}
+                              </span>
+                            </div>
+                            <span>{source.section || "HR1 Bill"}</span>
                           </span>
-                          <span className="text-xs text-gray-500">
+                          <div className="bg-gradient-to-r from-green-400 to-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">
                             {Math.round(source.score * 100)}% relevance
-                          </span>
+                          </div>
                         </div>
-                        <p className="text-gray-600 line-clamp-3">
+                        <p className="text-slate-600 line-clamp-3 leading-relaxed">
                           {source.text.substring(0, 200)}...
                         </p>
                         <button
                           onClick={() =>
                             copyToClipboard(source.text, `source-${source.id}`)
                           }
-                          className="mt-2 text-xs text-blue-600 hover:text-blue-800 flex items-center space-x-1"
+                          className="mt-3 text-xs font-medium text-blue-600 hover:text-blue-800 flex items-center space-x-1 hover:bg-blue-50 rounded-lg px-2 py-1 transition-all duration-200"
                         >
                           {copied === `source-${source.id}` ? (
-                            <CheckCircle className="h-3 w-3" />
+                            <CheckCircle className="h-3 w-3 animate-pulse" />
                           ) : (
                             <Copy className="h-3 w-3" />
                           )}
@@ -279,9 +310,11 @@ export default function Chat() {
                 </div>
               )}
 
-              {/* Timestamp */}
+              {/* Enhanced Timestamp */}
               <div
-                className={`text-xs mt-2 ${message.role === "user" ? "text-blue-200" : "text-gray-500"}`}
+                className={`text-xs mt-3 font-medium ${
+                  message.role === "user" ? "text-blue-100" : "text-slate-500"
+                }`}
               >
                 {message.timestamp.toLocaleTimeString()}
               </div>
@@ -291,31 +324,38 @@ export default function Chat() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Form */}
-      <div className="bg-white border-t border-gray-200 px-4 py-4">
-        <form onSubmit={handleSubmit} className="flex space-x-3">
+      {/* Enhanced Input Form */}
+      <div className="bg-white/80 backdrop-blur-sm border-t border-slate-200 shadow-lg px-6 py-6">
+        <form onSubmit={handleSubmit} className="flex space-x-4">
           <div className="flex-1">
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask a question about HR1... (Press Enter to send, Shift+Enter for new line)"
-              className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              rows={1}
-              style={{
-                minHeight: "42px",
-                maxHeight: "120px",
-                resize: "none",
-              }}
-              disabled={isLoading}
-            />
+            <div className="relative">
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask a question about HR1... (Press Enter to send, Shift+Enter for new line)"
+                className="w-full resize-none rounded-xl border-2 border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
+                rows={1}
+                style={{
+                  minHeight: "48px",
+                  maxHeight: "120px",
+                  resize: "none",
+                }}
+                disabled={isLoading}
+              />
+              {isLoading && (
+                <div className="absolute right-3 top-3">
+                  <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                </div>
+              )}
+            </div>
             <div className="flex items-center justify-between mt-2">
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-slate-500 font-medium">
                 {input.length}/1000 characters
               </span>
               {input.length > 1000 && (
-                <span className="text-xs text-red-500">
+                <span className="text-xs text-red-500 font-medium animate-pulse">
                   Too long! Please shorten your question.
                 </span>
               )}
@@ -324,12 +364,12 @@ export default function Chat() {
           <button
             type="submit"
             disabled={!input.trim() || isLoading || input.length > 1000}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+            className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium"
           >
             {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-              <Send className="h-4 w-4" />
+              <Send className="h-5 w-5" />
             )}
             <span>Send</span>
           </button>
