@@ -140,20 +140,20 @@ export default function Chat() {
 
   return (
     <div className="flex flex-col h-screen bg-blue-50">
-      {/* Header with simple styling */}
+      {/* Header with compact styling */}
       <div className="bg-blue-600 shadow-lg">
-        <div className="bg-white border-b px-6 py-4 flex items-center justify-between">
+        <div className="bg-white border-b px-4 py-3 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-blue-600">
+            <h1 className="text-xl font-bold text-blue-600">
               HR1 Q&A Assistant
             </h1>
-            <p className="text-sm text-gray-600 font-medium">
+            <p className="text-xs text-gray-600 font-medium">
               Ask questions about the "One Big Beautiful Bill Act"
             </p>
           </div>
           <button
             onClick={clearChat}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg border border-gray-200 disabled:opacity-50"
+            className="px-3 py-1 text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg border border-gray-200 disabled:opacity-50"
             disabled={messages.length === 0}
           >
             Clear Chat
@@ -161,22 +161,22 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Messages with simple styling */}
-      <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6">
+      {/* Messages with compact styling */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {messages.length === 0 && (
-          <div className="text-center py-16">
-            <div className="bg-blue-100 border border-blue-200 rounded-lg p-8 mx-auto max-w-lg">
-              <div className="bg-blue-500 rounded-full p-3 w-16 h-16 mx-auto mb-6">
-                <Info className="h-10 w-10 text-white mx-auto" />
+          <div className="text-center py-4">
+            <div className="bg-blue-100 border border-blue-200 rounded-lg p-4 mx-auto max-w-md">
+              <div className="bg-blue-500 rounded-full p-2 w-12 h-12 mx-auto mb-4">
+                <Info className="h-8 w-8 text-white mx-auto" />
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-3">
+              <h3 className="text-lg font-bold text-gray-800 mb-2">
                 Welcome to HR1 Q&A
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600 mb-4 text-sm">
                 Ask me anything about the HR1 "One Big Beautiful Bill Act" - tax
                 relief, border security, energy policy, healthcare, and more.
               </p>
-              <div className="text-sm text-gray-500 space-y-2 bg-white rounded-lg p-4">
+              <div className="text-xs text-gray-500 space-y-1 bg-white rounded-lg p-3">
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                   <p>"What does HR1 say about tax relief?"</p>
@@ -324,9 +324,9 @@ export default function Chat() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Enhanced Input Form */}
-      <div className="bg-white/80 backdrop-blur-sm border-t border-slate-200 shadow-lg px-6 py-6">
-        <form onSubmit={handleSubmit} className="flex space-x-4">
+      {/* Compact Input Form */}
+      <div className="bg-white border-t border-gray-200 px-4 py-3">
+        <form onSubmit={handleSubmit} className="flex space-x-3">
           <div className="flex-1">
             <div className="relative">
               <textarea
@@ -335,27 +335,27 @@ export default function Chat() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask a question about HR1... (Press Enter to send, Shift+Enter for new line)"
-                className="w-full resize-none rounded-xl border-2 border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
+                className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm"
                 rows={1}
                 style={{
-                  minHeight: "48px",
-                  maxHeight: "120px",
+                  minHeight: "40px",
+                  maxHeight: "80px",
                   resize: "none",
                 }}
                 disabled={isLoading}
               />
               {isLoading && (
-                <div className="absolute right-3 top-3">
-                  <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                <div className="absolute right-2 top-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
                 </div>
               )}
             </div>
-            <div className="flex items-center justify-between mt-2">
-              <span className="text-xs text-slate-500 font-medium">
+            <div className="flex items-center justify-between mt-1">
+              <span className="text-xs text-gray-500">
                 {input.length}/1000 characters
               </span>
               {input.length > 1000 && (
-                <span className="text-xs text-red-500 font-medium animate-pulse">
+                <span className="text-xs text-red-500">
                   Too long! Please shorten your question.
                 </span>
               )}
@@ -364,12 +364,12 @@ export default function Chat() {
           <button
             type="submit"
             disabled={!input.trim() || isLoading || input.length > 1000}
-            className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 text-sm font-medium"
           >
             {isLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Send className="h-5 w-5" />
+              <Send className="h-4 w-4" />
             )}
             <span>Send</span>
           </button>
