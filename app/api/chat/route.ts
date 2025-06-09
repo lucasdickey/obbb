@@ -15,12 +15,16 @@ const pinecone = new Pinecone({
 });
 
 // Initialize rate limiting (optional)
-const redis = process.env.UPSTASH_REDIS_REST_URL
-  ? new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-    })
-  : null;
+const redis =
+  process.env.UPSTASH_REDIS_REST_URL &&
+  process.env.UPSTASH_REDIS_REST_URL !== "your_upstash_redis_url_here" &&
+  process.env.UPSTASH_REDIS_REST_TOKEN &&
+  process.env.UPSTASH_REDIS_REST_TOKEN !== "your_upstash_redis_token_here"
+    ? new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+      })
+    : null;
 
 const ratelimit = redis
   ? new Ratelimit({

@@ -4,16 +4,33 @@ import { writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 
 const DATA_DIR = join(process.cwd(), "data");
-const HR1_URL = "https://www.govtrack.us/congress/bills/117/hr1/text/eh";
+const HR1_URL =
+  "https://www.congress.gov/bill/119th-congress/house-bill/1/text";
 
 interface BillTextExtractor {
   extractTextFromHtml(html: string): string;
 }
 
-class GovTrackExtractor implements BillTextExtractor {
+class CongressGovExtractor implements BillTextExtractor {
   extractTextFromHtml(html: string): string {
+    // Congress.gov has the bill text in specific containers
+    // Look for the main content area with bill text
+    let text = html;
+
+    // Try to extract just the bill content area
+    const billContentMatch =
+      html.match(
+        /<div[^>]*class="[^"]*bill-summary-content[^"]*"[^>]*>([\s\S]*?)<\/div>/i
+      ) ||
+      html.match(/<div[^>]*id="[^"]*content[^"]*"[^>]*>([\s\S]*?)<\/div>/i) ||
+      html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
+
+    if (billContentMatch) {
+      text = billContentMatch[1];
+    }
+
     // Remove HTML tags and extract clean text
-    let text = html
+    text = text
       // Remove script and style elements
       .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
@@ -24,10 +41,13 @@ class GovTrackExtractor implements BillTextExtractor {
       .replace(/<aside[^>]*>[\s\S]*?<\/aside>/gi, "")
       .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, "")
       .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, "")
-      // Remove ads and widgets
-      .replace(/<div[^>]*class="[^"]*ad[^"]*"[^>]*>[\s\S]*?<\/div>/gi, "")
-      .replace(/<div[^>]*id="[^"]*widget[^"]*"[^>]*>[\s\S]*?<\/div>/gi, "")
-      // Remove all HTML tags
+      // Remove forms and buttons
+      .replace(/<form[^>]*>[\s\S]*?<\/form>/gi, "")
+      .replace(/<button[^>]*>[\s\S]*?<\/button>/gi, "")
+      // Remove all HTML tags but preserve line breaks
+      .replace(/<br[^>]*>/gi, "\n")
+      .replace(/<\/p>/gi, "\n\n")
+      .replace(/<\/div>/gi, "\n")
       .replace(/<[^>]*>/g, " ")
       // Decode HTML entities
       .replace(/&nbsp;/g, " ")
@@ -41,13 +61,16 @@ class GovTrackExtractor implements BillTextExtractor {
       // Clean up whitespace
       .replace(/\s+/g, " ")
       .replace(/\n\s+/g, "\n")
+      .replace(/\n{3,}/g, "\n\n")
       .trim();
 
     // Extract the main bill text (look for the bill content markers)
     const billStartMarkers = [
       "H. R. 1",
-      "For the People Act of 2021",
+      "For the People Act",
       "To expand Americans' access to the ballot box",
+      "IN THE HOUSE OF REPRESENTATIVES",
+      "Congress:",
     ];
 
     let billText = text;
@@ -61,20 +84,18 @@ class GovTrackExtractor implements BillTextExtractor {
       }
     }
 
-    // Remove common page elements that might remain
+    // Remove common Congress.gov page elements that might remain
     billText = billText
+      .replace(/Text available as:.*?(?=\n|$)/gi, "")
       .replace(/Download PDF.*?(?=\n|$)/gi, "")
-      .replace(/Close Comparison.*?(?=\n|$)/gi, "")
-      .replace(/Primary Source.*?(?=\n|$)/gi, "")
-      .replace(/Government Publishing Office.*?(?=\n|$)/gi, "")
-      .replace(/Widget for your website.*?(?=\n|$)/gi, "")
-      .replace(/Follow GovTrack.*?(?=\n|$)/gi, "")
-      .replace(/About Ads.*?(?=\n|$)/gi, "")
-      .replace(/Hide These Ads.*?(?=\n|$)/gi, "")
-      .replace(/React to this bill.*?(?=\n|$)/gi, "")
-      .replace(/Save your opinion.*?(?=\n|$)/gi, "")
-      .replace(/Add Note.*?(?=\n|$)/gi, "")
-      .replace(/Visit us on.*?(?=\n|$)/gi, "")
+      .replace(/Compare.*?(?=\n|$)/gi, "")
+      .replace(/Print this page.*?(?=\n|$)/gi, "")
+      .replace(/Send to printer.*?(?=\n|$)/gi, "")
+      .replace(/More bill information.*?(?=\n|$)/gi, "")
+      .replace(/Congress.gov.*?(?=\n|$)/gi, "")
+      .replace(/Library of Congress.*?(?=\n|$)/gi, "")
+      .replace(/Browse by Date.*?(?=\n|$)/gi, "")
+      .replace(/About this website.*?(?=\n|$)/gi, "")
       .trim();
 
     return billText;
@@ -83,14 +104,24 @@ class GovTrackExtractor implements BillTextExtractor {
 
 async function fetchHR1Data(): Promise<void> {
   try {
-    console.log("🔄 Fetching HR1 bill text from GovTrack.us...");
+    console.log(
+      "🔄 Fetching HR1 bill text from Congress.gov (119th Congress)..."
+    );
 
     const response = await fetch(HR1_URL, {
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (compatible; HR1-SemanticQA/1.0; Educational Research Project)",
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         Accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Upgrade-Insecure-Requests": "1",
       },
     });
 
@@ -104,7 +135,7 @@ async function fetchHR1Data(): Promise<void> {
     console.log("✅ Successfully fetched HTML content");
 
     // Extract clean text
-    const extractor = new GovTrackExtractor();
+    const extractor = new CongressGovExtractor();
     const cleanText = extractor.extractTextFromHtml(html);
 
     if (cleanText.length < 1000) {
@@ -135,14 +166,15 @@ async function fetchHR1Data(): Promise<void> {
 
     // Create a summary file with metadata
     const metadata = {
-      source: HR1_URL,
+      source: "Manual download from Congress.gov",
       fetchDate: new Date().toISOString(),
-      title: "H.R.1 - For the People Act of 2021",
+      title: "H.R.1 - One Big Beautiful Bill Act (119th Congress)",
       description:
-        "To expand Americans' access to the ballot box, reduce the influence of big money in politics, strengthen ethics rules for public servants, and implement other anti-corruption measures for the purpose of fortifying our democracy, and for other purposes.",
+        "To provide for reconciliation pursuant to title II of H. Con. Res. 14. A comprehensive reconciliation bill covering tax relief, border security, energy policy, healthcare reforms, education funding, and government efficiency measures.",
       textLength: cleanText.length,
       estimatedTokens: Math.round(cleanText.length / 4),
-      extractionMethod: "GovTrack HTML parsing",
+      extractionMethod: "Manual download from Congress.gov",
+      congress: "119th Congress (2025-2027)",
     };
 
     const metadataPath = join(DATA_DIR, "hr1-metadata.json");
