@@ -144,29 +144,39 @@ export async function POST(req: NextRequest) {
       .map((chunk, index) => `[${index + 1}] ${chunk.text}`)
       .join("\n\n");
 
-    // Step 5: Generate AI response
-    const systemPrompt = `You are an expert assistant that answers questions about the HR1 "For the People Act" legislative bill. You must base your answers ONLY on the provided context from the bill.
+    // Generate response with structured format
+    const prompt = `You are a helpful assistant answering questions about the HR1 "One Big Beautiful Bill Act" (119th Congress). 
 
-Instructions:
-1. Answer the user's question using only the information provided in the context
-2. Be specific and accurate, citing relevant sections when possible
-3. If the context doesn't contain enough information to fully answer the question, say so
-4. Use clear, accessible language that explains complex legislative concepts
-5. When referencing specific parts of the bill, use the format [1], [2], etc. to cite the source numbers
-6. Do not make up information or draw from knowledge outside the provided context
+Based on the following relevant excerpts from the bill, provide a comprehensive answer with the following structure:
 
-Context from HR1 bill:
-${context}`;
+1. Start with 3-5 key bullet points using "•" format
+2. Follow with a detailed prose explanation
+3. Focus on accuracy and cite specific provisions when possible
+
+Question: ${query}
+
+Relevant excerpts from HR1:
+${relevantChunks.map((chunk, i) => `[${i + 1}] ${chunk.text}`).join("\n\n")}
+
+Provide your response in this exact format:
+• [Key point 1]
+• [Key point 2] 
+• [Key point 3]
+
+[Detailed prose explanation here...]`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4",
       messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: query },
+        {
+          role: "system",
+          content:
+            "You are a knowledgeable legislative assistant. Always structure your responses with bullet points first, then detailed prose explanation.",
+        },
+        { role: "user", content: prompt },
       ],
+      max_tokens: 800,
       temperature: 0.1,
-      max_tokens: 500,
-      stream: false,
     });
 
     const response =
