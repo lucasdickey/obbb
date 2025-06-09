@@ -5,6 +5,10 @@ import { join } from "path";
 import OpenAI from "openai";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { encoding_for_model } from "tiktoken";
+import { config } from "dotenv";
+
+// Load environment variables from .env.local
+config({ path: join(process.cwd(), ".env.local") });
 
 // Configuration
 const DATA_DIR = join(process.cwd(), "data");
@@ -247,30 +251,45 @@ class PineconeManager {
 
     try {
       const indexes = await this.pinecone.listIndexes();
-      const indexExists = indexes.indexes?.some(
+      const existingIndex = indexes.indexes?.find(
         (index) => index.name === this.indexName
       );
 
-      if (!indexExists) {
-        console.log(`📦 Creating Pinecone index: ${this.indexName}`);
-        await this.pinecone.createIndex({
-          name: this.indexName,
-          dimension: 1536, // OpenAI ada-002 embedding dimension
-          metric: "cosine",
-          spec: {
-            serverless: {
-              cloud: "aws",
-              region: "us-east-1",
-            },
-          },
-        });
-
-        // Wait for index to be ready
-        console.log("⏳ Waiting for index to be ready...");
-        await new Promise((resolve) => setTimeout(resolve, 10000));
-      } else {
-        console.log(`✅ Pinecone index ${this.indexName} already exists`);
+      if (existingIndex) {
+        // Check if the existing index has the wrong dimensions
+        if (existingIndex.dimension !== 1536) {
+          console.log(
+            `🗑️ Deleting existing index with wrong dimensions (${existingIndex.dimension} != 1536)`
+          );
+          await this.pinecone.deleteIndex(this.indexName);
+          console.log("⏳ Waiting for index deletion...");
+          await new Promise((resolve) => setTimeout(resolve, 10000));
+        } else {
+          console.log(
+            `✅ Pinecone index ${this.indexName} already exists with correct dimensions`
+          );
+          return;
+        }
       }
+
+      console.log(
+        `📦 Creating Pinecone index: ${this.indexName} with 1536 dimensions`
+      );
+      await this.pinecone.createIndex({
+        name: this.indexName,
+        dimension: 1536, // OpenAI ada-002 embedding dimension
+        metric: "cosine",
+        spec: {
+          serverless: {
+            cloud: "aws",
+            region: "us-east-1",
+          },
+        },
+      });
+
+      // Wait for index to be ready
+      console.log("⏳ Waiting for index to be ready...");
+      await new Promise((resolve) => setTimeout(resolve, 30000));
     } catch (error) {
       console.error("❌ Error with Pinecone index:", error);
       throw error;
