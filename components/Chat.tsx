@@ -212,9 +212,30 @@ export default function Chat() {
                         <div className="bg-yellow rounded-full p-2">
                           <Loader2 className="h-4 w-4 animate-spin text-black" />
                         </div>
-                        <span className="text-gray-700 font-medium">
-                          {message.content}
-                        </span>
+                        <div className="flex flex-col space-y-1">
+                          <span className="text-gray-700 font-medium">
+                            Searching HR1 bill and generating response
+                          </span>
+                          <div className="flex items-center space-x-1">
+                            <span className="text-gray-600 text-sm">
+                              Processing
+                            </span>
+                            <div className="flex space-x-1">
+                              <div
+                                className="w-1 h-1 bg-gray-600 rounded-full animate-bounce"
+                                style={{ animationDelay: "0ms" }}
+                              ></div>
+                              <div
+                                className="w-1 h-1 bg-gray-600 rounded-full animate-bounce"
+                                style={{ animationDelay: "150ms" }}
+                              ></div>
+                              <div
+                                className="w-1 h-1 bg-gray-600 rounded-full animate-bounce"
+                                style={{ animationDelay: "300ms" }}
+                              ></div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     ) : message.error ? (
                       <div className="flex items-center space-x-3">
