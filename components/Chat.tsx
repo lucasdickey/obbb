@@ -192,85 +192,91 @@ export default function Chat() {
           </div>
         )}
 
-        {messages.map((message, index) => (
-          <div key={index} className="flex justify-start">
-            <div
-              className={`max-w-2xl w-full ${
-                message.role === "user"
-                  ? "user-message text-black font-semibold rounded-xl px-6 py-4"
-                  : message.error
-                    ? "bg-white border border-red-600 shadow-md"
-                    : "bg-white border border-gray-200 shadow-md"
-              } rounded-lg px-4 py-3`}
-            >
-              {/* Message Content */}
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  {message.processing ? (
-                    <div className="flex items-center space-x-3">
-                      <div className="bg-yellow rounded-full p-2">
-                        <Loader2 className="h-4 w-4 animate-spin text-black" />
-                      </div>
-                      <span className="text-gray-700 font-medium">
-                        {message.content}
-                      </span>
-                    </div>
-                  ) : message.error ? (
-                    <div className="flex items-center space-x-3">
-                      <div className="bg-red-600 rounded-full p-2">
-                        <AlertCircle className="h-4 w-4 text-white" />
-                      </div>
-                      <span className="text-red-600 font-medium">
-                        {message.content}
-                      </span>
-                    </div>
-                  ) : (
-                    <div>
-                      {message.role === "user" ? (
-                        <div className="whitespace-pre-wrap leading-relaxed">
-                          {message.content}
+        <div className="max-w-none lg:max-w-6xl lg:mx-auto">
+          {messages.map((message, index) => (
+            <div key={index} className="flex justify-start mb-4">
+              <div
+                className={`w-full ${
+                  message.role === "user"
+                    ? "user-message text-black font-semibold rounded-xl px-8 py-6 mx-4"
+                    : message.error
+                      ? "bg-white border border-red-600 shadow-md"
+                      : "bg-white border border-gray-200 shadow-md"
+                } rounded-lg px-4 py-3`}
+              >
+                {/* Message Content */}
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    {message.processing ? (
+                      <div className="flex items-center space-x-3">
+                        <div className="bg-yellow rounded-full p-2">
+                          <Loader2 className="h-4 w-4 animate-spin text-black" />
                         </div>
+                        <span className="text-gray-700 font-medium">
+                          {message.content}
+                        </span>
+                      </div>
+                    ) : message.error ? (
+                      <div className="flex items-center space-x-3">
+                        <div className="bg-red-600 rounded-full p-2">
+                          <AlertCircle className="h-4 w-4 text-white" />
+                        </div>
+                        <span className="text-red-600 font-medium">
+                          {message.content}
+                        </span>
+                      </div>
+                    ) : (
+                      <div>
+                        {message.role === "user" ? (
+                          <div className="whitespace-pre-wrap leading-relaxed">
+                            {message.content}
+                          </div>
+                        ) : (
+                          <AIResponse
+                            content={message.content}
+                            sources={message.sources}
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Copy Button */}
+                  {!message.processing && !message.error && (
+                    <button
+                      onClick={() =>
+                        copyToClipboard(message.content, `${index}`)
+                      }
+                      className={`ml-3 p-2 rounded-lg ${
+                        message.role === "user"
+                          ? "text-yellow-800 hover:text-black hover:bg-yellow"
+                          : "text-gray-600 hover:text-black hover:bg-gray-100"
+                      }`}
+                      title="Copy message"
+                    >
+                      {copied === `${index}` ? (
+                        <CheckCircle className="h-4 w-4" />
                       ) : (
-                        <AIResponse
-                          content={message.content}
-                          sources={message.sources}
-                        />
+                        <Copy className="h-4 w-4" />
                       )}
-                    </div>
+                    </button>
                   )}
                 </div>
 
-                {/* Copy Button */}
-                {!message.processing && !message.error && (
-                  <button
-                    onClick={() => copyToClipboard(message.content, `${index}`)}
-                    className={`ml-3 p-2 rounded-lg ${
-                      message.role === "user"
-                        ? "text-yellow-800 hover:text-black hover:bg-yellow"
-                        : "text-gray-600 hover:text-black hover:bg-gray-100"
-                    }`}
-                    title="Copy message"
-                  >
-                    {copied === `${index}` ? (
-                      <CheckCircle className="h-4 w-4" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </button>
-                )}
-              </div>
-
-              {/* Timestamp */}
-              <div
-                className={`text-xs mt-3 font-medium ${
-                  message.role === "user" ? "text-yellow-800" : "text-gray-600"
-                }`}
-              >
-                {message.timestamp.toLocaleTimeString()}
+                {/* Timestamp */}
+                <div
+                  className={`text-xs mt-3 font-medium ${
+                    message.role === "user"
+                      ? "text-yellow-800"
+                      : "text-gray-600"
+                  }`}
+                >
+                  {message.timestamp.toLocaleTimeString()}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
         <div ref={messagesEndRef} />
       </div>
 
@@ -382,10 +388,13 @@ function AIResponse({
             <div className="w-2 h-2 bg-yellow rounded-full"></div>
             <span>Key Points</span>
           </h4>
-          <ul className="space-y-1 text-sm text-gray-800">
+          <ul className="space-y-2 text-sm text-gray-800 ml-4">
             {bulletPoints.map((point, index) => (
-              <li key={index} className="flex items-start space-x-2">
-                <div className="w-1 h-1 bg-gray-600 rounded-full mt-2 flex-shrink-0"></div>
+              <li key={index} className="flex items-start space-x-3">
+                <div
+                  className="w-2 h-2 rounded-full mt-2 flex-shrink-0"
+                  style={{ backgroundColor: "#8D3214" }}
+                ></div>
                 <span>{point.replace(/^[•-]\s*/, "")}</span>
               </li>
             ))}
@@ -426,52 +435,63 @@ function AIResponse({
                   className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold text-black flex items-center space-x-2">
+                    <div className="flex items-center space-x-2">
                       <div className="w-6 h-6 bg-yellow rounded-full flex items-center justify-center">
                         <span className="text-black text-xs font-bold">
                           {sourceIndex + 1}
                         </span>
                       </div>
-                      <span>{source.section || "HR1 Bill"}</span>
-                    </span>
-                    <div
-                      className="bg-yellow text-black px-2 py-1 rounded-full text-xs font-medium cursor-help"
-                      title="Relevance score as percentage - how well this text matches your question"
-                    >
-                      {Math.round(source.score * 100)}%
+                      <span className="font-semibold text-black">
+                        {source.section || "HR1 Bill"}
+                      </span>
+                      <div
+                        className="bg-yellow text-black px-2 py-1 rounded-full text-xs font-medium cursor-help"
+                        title="Relevance score as percentage - how well this text matches your question"
+                      >
+                        {Math.round(source.score * 100)}%
+                      </div>
                     </div>
-                  </div>
-                  <p className="text-gray-700 leading-relaxed mb-3">
-                    {displayText}
-                    {needsTruncation && !isExpanded && "..."}
-                  </p>
-
-                  <div className="flex items-center space-x-3">
                     <button
                       onClick={() => {
                         const bulletSummary = bulletPoints.join("\n");
                         const fullText = `${bulletSummary}\n\nSource: ${source.text}`;
                         copyToClipboard(fullText, `source-${source.id}`);
                       }}
-                      className="text-xs font-medium text-black hover:text-yellow-800 flex items-center space-x-1 hover:bg-yellow rounded-lg px-2 py-1"
+                      className="text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg p-1"
+                      title="Copy summary + full text"
                     >
                       {copied === `source-${source.id}` ? (
-                        <CheckCircle className="h-3 w-3" />
+                        <CheckCircle className="h-4 w-4" />
                       ) : (
-                        <Copy className="h-3 w-3" />
+                        <Copy className="h-4 w-4" />
                       )}
-                      <span>Copy summary + full text</span>
                     </button>
-
-                    {needsTruncation && (
-                      <button
-                        onClick={() => toggleSourceExpanded(source.id)}
-                        className="text-xs font-medium text-gray-600 hover:text-black rounded-lg px-2 py-1"
-                      >
-                        {isExpanded ? "Show less" : "Show more"}
-                      </button>
-                    )}
                   </div>
+                  <p className="text-gray-700 leading-relaxed">
+                    {displayText}
+                    {needsTruncation && !isExpanded && (
+                      <>
+                        ...{" "}
+                        <button
+                          onClick={() => toggleSourceExpanded(source.id)}
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
+                          show more
+                        </button>
+                      </>
+                    )}
+                    {needsTruncation && isExpanded && (
+                      <>
+                        {" "}
+                        <button
+                          onClick={() => toggleSourceExpanded(source.id)}
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
+                          show less
+                        </button>
+                      </>
+                    )}
+                  </p>
                 </div>
               );
             })}

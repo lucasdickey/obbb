@@ -37,6 +37,12 @@
 .text-white {
   color: #ffffff;
 }
+.text-blue-600 {
+  color: #2563eb;
+}
+.text-blue-800 {
+  color: #1e40af;
+}
 .text-gray-600 {
   color: #6b6b6b;
 }
@@ -97,6 +103,9 @@
   box-shadow:
     0 10px 15px -3px rgba(0, 0, 0, 0.1),
     0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+.underline {
+  text-decoration-line: underline;
 }
 
 /* Spacing */
@@ -168,6 +177,13 @@
 }
 .mb-6 {
   margin-bottom: 1.5rem;
+}
+.ml-4 {
+  margin-left: 1rem;
+}
+.mx-4 {
+  margin-left: 1rem;
+  margin-right: 1rem;
 }
 .mx-auto {
   margin-left: auto;
@@ -245,6 +261,9 @@
 .w-full {
   width: 100%;
 }
+.max-w-none {
+  max-width: none;
+}
 .max-w-sm {
   max-width: 24rem;
 }
@@ -253,6 +272,17 @@
 }
 .max-w-2xl {
   max-width: 42rem;
+}
+
+/* Responsive Design */
+@media (min-width: 1024px) {
+  .lg\:max-w-6xl {
+    max-width: 72rem;
+  }
+  .lg\:mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 /* Borders */
@@ -349,6 +379,9 @@
 }
 .hover\:text-black:hover {
   color: #000000;
+}
+.hover\:text-blue-800:hover {
+  color: #1e40af;
 }
 .hover\:text-yellow-800:hover {
   color: #b8860b;
