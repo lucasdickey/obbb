@@ -147,7 +147,7 @@ export default function Chat() {
             HR1 Q&A Assistant
           </h1>
           <p className="text-sm text-gray-500">
-            Ask questions about the "For the People Act"
+            Ask questions about the "One Big Beautiful Bill Act"
           </p>
         </div>
         <button
@@ -169,13 +169,13 @@ export default function Chat() {
                 Welcome to HR1 Q&A
               </h3>
               <p className="text-gray-600 text-sm mb-4">
-                Ask me anything about the HR1 "For the People Act" - voting
-                rights, campaign finance, ethics reforms, and more.
+                Ask me anything about the HR1 "One Big Beautiful Bill Act" - tax
+                relief, border security, energy policy, healthcare, and more.
               </p>
               <div className="text-xs text-gray-500 space-y-1">
-                <p>• "What does HR1 say about voter registration?"</p>
-                <p>• "How does HR1 address campaign finance?"</p>
-                <p>• "What are the ethics reforms in HR1?"</p>
+                <p>• "What does HR1 say about tax relief?"</p>
+                <p>• "How does HR1 address border security?"</p>
+                <p>• "What are the energy provisions in HR1?"</p>
               </div>
             </div>
           </div>
