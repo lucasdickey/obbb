@@ -326,6 +326,9 @@
 .top-2 {
   top: 0.5rem;
 }
+.cursor-help {
+  cursor: help;
+}
 
 /* Focus & Hover States */
 .focus\:outline-none:focus {
@@ -346,6 +349,9 @@
 }
 .hover\:text-black:hover {
   color: #000000;
+}
+.hover\:text-yellow-800:hover {
+  color: #b8860b;
 }
 .disabled\:opacity-50:disabled {
   opacity: 0.5;

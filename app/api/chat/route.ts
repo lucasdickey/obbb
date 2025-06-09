@@ -147,23 +147,24 @@ export async function POST(req: NextRequest) {
     // Generate response with structured format
     const prompt = `You are a helpful assistant answering questions about the HR1 "One Big Beautiful Bill Act" (119th Congress). 
 
-Based on the following relevant excerpts from the bill, provide a comprehensive answer with the following structure:
+Based on the following relevant excerpts from the bill, provide a comprehensive answer with this EXACT structure:
 
-1. Start with 3-5 key bullet points using "•" format
-2. Follow with a detailed prose explanation
-3. Focus on accuracy and cite specific provisions when possible
+FIRST: 3-5 bullet points starting with "•" (each on a new line)
+THEN: A blank line
+THEN: A detailed prose explanation (multiple sentences, no bullets)
 
 Question: ${query}
 
 Relevant excerpts from HR1:
 ${relevantChunks.map((chunk, i) => `[${i + 1}] ${chunk.text}`).join("\n\n")}
 
-Provide your response in this exact format:
-• [Key point 1]
-• [Key point 2] 
-• [Key point 3]
+EXAMPLE FORMAT:
+• Key point about the bill's main provision
+• Another important aspect mentioned in the excerpts  
+• Third key finding from the text
+• Additional detail if relevant
 
-[Detailed prose explanation here...]`;
+This is the detailed explanation that expands on the bullet points above. It should be written in paragraph form without any bullet points, providing comprehensive context and analysis based on the excerpts provided.`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
@@ -171,7 +172,7 @@ Provide your response in this exact format:
         {
           role: "system",
           content:
-            "You are a knowledgeable legislative assistant. Always structure your responses with bullet points first, then detailed prose explanation.",
+            "You are a knowledgeable legislative assistant. You MUST follow the exact format: bullet points first (each starting with •), then a blank line, then prose explanation. Never mix bullets and prose together.",
         },
         { role: "user", content: prompt },
       ],

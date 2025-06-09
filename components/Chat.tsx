@@ -193,10 +193,7 @@ export default function Chat() {
         )}
 
         {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-          >
+          <div key={index} className="flex justify-start">
             <div
               className={`max-w-2xl w-full ${
                 message.role === "user"
@@ -341,6 +338,9 @@ function AIResponse({
   sources?: CitationSource[];
 }) {
   const [copied, setCopied] = useState<string | null>(null);
+  const [expandedSources, setExpandedSources] = useState<Set<string>>(
+    new Set()
+  );
 
   const copyToClipboard = async (text: string, id: string) => {
     try {
@@ -350,6 +350,16 @@ function AIResponse({
     } catch (error) {
       console.error("Failed to copy:", error);
     }
+  };
+
+  const toggleSourceExpanded = (sourceId: string) => {
+    const newExpanded = new Set(expandedSources);
+    if (newExpanded.has(sourceId)) {
+      newExpanded.delete(sourceId);
+    } else {
+      newExpanded.add(sourceId);
+    }
+    setExpandedSources(newExpanded);
   };
 
   // Parse the response into bullet points and prose
@@ -404,44 +414,67 @@ function AIResponse({
             <span>Sources from HR1 Bill</span>
           </h4>
           <div className="space-y-3">
-            {sources.map((source, sourceIndex) => (
-              <div
-                key={source.id}
-                className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-semibold text-black flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-yellow rounded-full flex items-center justify-center">
-                      <span className="text-black text-xs font-bold">
-                        {sourceIndex + 1}
-                      </span>
+            {sources.map((source, sourceIndex) => {
+              const isExpanded = expandedSources.has(source.id);
+              const truncatedText = source.text.substring(0, 600);
+              const needsTruncation = source.text.length > 600;
+              const displayText = isExpanded ? source.text : truncatedText;
+
+              return (
+                <div
+                  key={source.id}
+                  className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold text-black flex items-center space-x-2">
+                      <div className="w-6 h-6 bg-yellow rounded-full flex items-center justify-center">
+                        <span className="text-black text-xs font-bold">
+                          {sourceIndex + 1}
+                        </span>
+                      </div>
+                      <span>{source.section || "HR1 Bill"}</span>
+                    </span>
+                    <div
+                      className="bg-yellow text-black px-2 py-1 rounded-full text-xs font-medium cursor-help"
+                      title="Relevance score as percentage - how well this text matches your question"
+                    >
+                      {Math.round(source.score * 100)}%
                     </div>
-                    <span>{source.section || "HR1 Bill"}</span>
-                  </span>
-                  <div className="bg-yellow text-black px-2 py-1 rounded-full text-xs font-medium">
-                    {Math.round(source.score * 100)}% relevance
+                  </div>
+                  <p className="text-gray-700 leading-relaxed mb-3">
+                    {displayText}
+                    {needsTruncation && !isExpanded && "..."}
+                  </p>
+
+                  <div className="flex items-center space-x-3">
+                    <button
+                      onClick={() => {
+                        const bulletSummary = bulletPoints.join("\n");
+                        const fullText = `${bulletSummary}\n\nSource: ${source.text}`;
+                        copyToClipboard(fullText, `source-${source.id}`);
+                      }}
+                      className="text-xs font-medium text-black hover:text-yellow-800 flex items-center space-x-1 hover:bg-yellow rounded-lg px-2 py-1"
+                    >
+                      {copied === `source-${source.id}` ? (
+                        <CheckCircle className="h-3 w-3" />
+                      ) : (
+                        <Copy className="h-3 w-3" />
+                      )}
+                      <span>Copy summary + full text</span>
+                    </button>
+
+                    {needsTruncation && (
+                      <button
+                        onClick={() => toggleSourceExpanded(source.id)}
+                        className="text-xs font-medium text-gray-600 hover:text-black rounded-lg px-2 py-1"
+                      >
+                        {isExpanded ? "Show less" : "Show more"}
+                      </button>
+                    )}
                   </div>
                 </div>
-                <p className="text-gray-700 leading-relaxed mb-3">
-                  {source.text.substring(0, 200)}...
-                </p>
-                <button
-                  onClick={() => {
-                    const bulletSummary = bulletPoints.join("\n");
-                    const fullText = `${bulletSummary}\n\nSource: ${source.text}`;
-                    copyToClipboard(fullText, `source-${source.id}`);
-                  }}
-                  className="text-xs font-medium text-black hover:text-yellow-800 flex items-center space-x-1 hover:bg-yellow rounded-lg px-2 py-1"
-                >
-                  {copied === `source-${source.id}` ? (
-                    <CheckCircle className="h-3 w-3" />
-                  ) : (
-                    <Copy className="h-3 w-3" />
-                  )}
-                  <span>Copy summary + full text</span>
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
