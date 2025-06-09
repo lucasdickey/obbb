@@ -445,7 +445,7 @@ function AIResponse({
                         {source.section || "HR1 Bill"}
                       </span>
                       <div
-                        className="bg-yellow text-black px-2 py-1 rounded-full text-xs font-medium cursor-help"
+                        className="bg-yellow text-black px-3 py-1 rounded-lg text-xs font-medium cursor-help whitespace-nowrap"
                         title="Relevance score as percentage - how well this text matches your question"
                       >
                         {Math.round(source.score * 100)}%

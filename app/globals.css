@@ -303,6 +303,9 @@
 .text-center {
   text-align: center;
 }
+.whitespace-nowrap {
+  white-space: nowrap;
+}
 .space-y-1 > * + * {
   margin-top: 0.25rem;
 }
