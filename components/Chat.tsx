@@ -139,21 +139,21 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Header with gradient */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg">
-        <div className="backdrop-blur-sm bg-white/90 border-b border-white/20 px-6 py-4 flex items-center justify-between">
+    <div className="flex flex-col h-screen bg-blue-50">
+      {/* Header with simple styling */}
+      <div className="bg-blue-600 shadow-lg">
+        <div className="bg-white border-b px-6 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold text-blue-600">
               HR1 Q&A Assistant
             </h1>
-            <p className="text-sm text-slate-600 font-medium">
+            <p className="text-sm text-gray-600 font-medium">
               Ask questions about the "One Big Beautiful Bill Act"
             </p>
           </div>
           <button
             onClick={clearChat}
-            className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-white/50 rounded-lg transition-all duration-200 border border-slate-200 hover:shadow-md disabled:opacity-50"
+            className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg border border-gray-200 disabled:opacity-50"
             disabled={messages.length === 0}
           >
             Clear Chat
@@ -161,22 +161,22 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Messages with enhanced styling */}
+      {/* Messages with simple styling */}
       <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6">
         {messages.length === 0 && (
           <div className="text-center py-16">
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-8 mx-auto max-w-lg shadow-xl">
-              <div className="bg-gradient-to-br from-blue-500 to-purple-500 rounded-full p-3 w-16 h-16 mx-auto mb-6 shadow-lg">
+            <div className="bg-blue-100 border border-blue-200 rounded-lg p-8 mx-auto max-w-lg">
+              <div className="bg-blue-500 rounded-full p-3 w-16 h-16 mx-auto mb-6">
                 <Info className="h-10 w-10 text-white mx-auto" />
               </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-3">
+              <h3 className="text-xl font-bold text-gray-800 mb-3">
                 Welcome to HR1 Q&A
               </h3>
-              <p className="text-slate-600 mb-6 leading-relaxed">
+              <p className="text-gray-600 mb-6">
                 Ask me anything about the HR1 "One Big Beautiful Bill Act" - tax
                 relief, border security, energy policy, healthcare, and more.
               </p>
-              <div className="text-sm text-slate-500 space-y-2 bg-white/50 rounded-lg p-4">
+              <div className="text-sm text-gray-500 space-y-2 bg-white rounded-lg p-4">
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                   <p>"What does HR1 say about tax relief?"</p>
