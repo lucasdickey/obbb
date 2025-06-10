@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "name": "ob3-chat-hr1-assistant",
+  "build": {
+    "env": {
+      "ENABLE_EXPERIMENTAL_COREPACK": "1"
+    }
+  },
+  "env": {
+    "OPENAI_API_KEY": "@openai-api-key",
+    "PINECONE_API_KEY": "@pinecone-api-key",
+    "PINECONE_ENVIRONMENT": "@pinecone-environment",
+    "PINECONE_INDEX_NAME": "@pinecone-index-name",
+    "UPSTASH_REDIS_REST_URL": "@upstash-redis-url",
+    "UPSTASH_REDIS_REST_TOKEN": "@upstash-redis-token"
+  },
+  "functions": {
+    "app/api/chat/route.ts": {
+      "maxDuration": 30
+    }
+  }
+}

@@ -137,19 +137,74 @@ The application follows a standard RAG (Retrieval-Augmented Generation) pattern:
 
 ### Vercel (Recommended)
 
-1. Connect your repository to Vercel
-2. Add environment variables in Vercel dashboard
-3. Deploy automatically on push to main branch
+This project is optimized for Vercel deployment with included `vercel.json` configuration.
 
-### Manual Deployment
+#### Quick Deploy
 
-1. Build the application:
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/ob3-chat)
 
-```bash
-npm run build
-```
+#### Manual Deployment
 
-2. Deploy the `.next` folder to your hosting provider
+1. **Connect Repository**
+
+   ```bash
+   npx vercel --prod
+   ```
+
+2. **Environment Variables**
+
+   Configure these variables in your Vercel dashboard:
+
+   **Required:**
+
+   - `OPENAI_API_KEY` - Your OpenAI API key
+   - `PINECONE_API_KEY` - Your Pinecone API key
+   - `PINECONE_ENVIRONMENT` - Your Pinecone environment URL
+   - `PINECONE_INDEX_NAME` - Pinecone index name (default: `obbb`)
+
+   **Optional (for rate limiting):**
+
+   - `UPSTASH_REDIS_REST_URL` - Upstash Redis URL
+   - `UPSTASH_REDIS_REST_TOKEN` - Upstash Redis token
+
+3. **Domain Configuration**
+
+   Update the `NEXT_PUBLIC_APP_URL` if using a custom domain:
+
+   ```
+   NEXT_PUBLIC_APP_URL=https://yourdomain.com
+   ```
+
+4. **Deploy**
+
+   Push to your main branch or run:
+
+   ```bash
+   vercel --prod
+   ```
+
+#### Pre-Deploy Checklist
+
+- [ ] All environment variables configured
+- [ ] Pinecone index created and populated with HR1 data
+- [ ] Build passes: `npm run build`
+- [ ] TypeScript checks pass: `npm run type-check`
+- [ ] No console errors in production build
+
+### Other Platforms
+
+The application can be deployed on any platform supporting Node.js:
+
+- **Netlify**: Use the `npm run build` command
+- **Railway**: Automatic deployments from Git
+- **Render**: Configure build command as `npm run build`
+
+### Production Considerations
+
+- **Rate Limiting**: Configure Upstash Redis for production rate limiting
+- **Monitoring**: Set up error tracking (Sentry, etc.)
+- **Analytics**: Add usage analytics if needed
+- **CORS**: Configure if serving from different domains
 
 ## API Endpoints
 

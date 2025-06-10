@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import {
   Send,
-  Loader2,
   ExternalLink,
   Copy,
   CheckCircle,
@@ -145,11 +144,25 @@ export default function Chat() {
       {/* Header with accessible styling */}
       <div className="bg-black shadow-lg">
         <div className="bg-white border-b px-4 py-3 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-black">HR1 Q&A Assistant</h1>
-            <p className="text-xs text-gray-600 font-medium">
-              Ask questions about the "One Big Beautiful Bill Act"
-            </p>
+          <div className="flex items-center space-x-4">
+            <div className="flex-shrink-0">
+              <img
+                src="/images/header-image-hr1.png"
+                alt="HR1 One Big Beautiful Bill"
+                className="h-12 w-12 object-contain"
+              />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-black">
+                OB3.chat - One Big Beautiful Bill Act Chat assistant
+              </h1>
+              <p className="text-xs text-gray-600 font-medium">
+                Ask questions about the 2025 House Resolution 1, which was
+                passed and is on its way to the Senate for debate. <br />
+                It is highly likely a reconciliation will be necessary after the
+                Senate passes its own version of the bill.
+              </p>
+            </div>
           </div>
           <button
             onClick={clearChat}
@@ -164,30 +177,45 @@ export default function Chat() {
       {/* Messages with accessible styling */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {messages.length === 0 && (
-          <div className="text-center py-4">
-            <div className="bg-yellow-light border border-yellow rounded-lg p-4 mx-auto max-w-md">
-              <div className="bg-yellow rounded-full p-2 w-12 h-12 mx-auto mb-4">
-                <Info className="h-8 w-8 text-black mx-auto" />
-              </div>
-              <h3 className="text-lg font-bold text-black mb-2">
-                Welcome to HR1 Q&A
-              </h3>
-              <p className="text-gray-700 mb-4 text-sm">
-                Ask me anything about the HR1 "One Big Beautiful Bill Act" - tax
-                relief, border security, energy policy, healthcare, and more.
-              </p>
-              <div className="text-xs text-gray-600 space-y-1 bg-white rounded-lg p-3">
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-yellow rounded-full"></div>
-                  <p>"What does HR1 say about tax relief?"</p>
+          <div className="py-8">
+            <div className="max-w-6xl mx-auto">
+              <div className="flex flex-col lg:flex-row items-center justify-center space-y-8 lg:space-y-0 lg:space-x-12">
+                {/* Landing Image */}
+                <div className="flex-shrink-0">
+                  <img
+                    src="/images/initial-landing-image.png"
+                    alt="One Big Beautiful Bill - HR1 2025"
+                    className="w-80 h-80 object-contain"
+                  />
                 </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-yellow rounded-full"></div>
-                  <p>"How does HR1 address border security?"</p>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-yellow rounded-full"></div>
-                  <p>"What are the energy provisions in HR1?"</p>
+
+                {/* Welcome Content */}
+                <div className="bg-yellow-light border border-yellow rounded-lg p-6 max-w-md">
+                  <div className="bg-yellow rounded-full p-2 w-12 h-12 mx-auto mb-4">
+                    <Info className="h-8 w-8 text-black mx-auto" />
+                  </div>
+                  <h3 className="text-lg font-bold text-black mb-2 text-center">
+                    Welcome to HR1 Q&A
+                  </h3>
+                  <p className="text-gray-700 mb-4 text-sm text-center">
+                    Ask me anything about the HR1 "One Big Beautiful Bill Act" -
+                    tax relief, border security, energy policy, healthcare, and
+                    more.
+                  </p>
+                  <div className="text-xs text-gray-600 space-y-2 bg-white rounded-lg p-3">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-yellow rounded-full"></div>
+                      <p>"What does HR1 say about tax relief?"</p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-yellow rounded-full"></div>
+                      <p>"How does HR1 address border security?"</p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-yellow rounded-full"></div>
+                      <p>"What are the energy provisions in HR1?"</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -212,7 +240,11 @@ export default function Chat() {
                     {message.processing ? (
                       <div className="flex items-center space-x-3">
                         <div className="bg-yellow rounded-full p-2">
-                          <Loader2 className="h-4 w-4 animate-spin text-black" />
+                          <img
+                            src="/images/loading-icon.png"
+                            alt="Loading..."
+                            className="h-6 w-6 animate-spin"
+                          />
                         </div>
                         <div className="flex flex-col space-y-1">
                           <span className="text-gray-700 font-medium">
@@ -258,32 +290,42 @@ export default function Chat() {
                           <AIResponse
                             content={message.content}
                             sources={message.sources}
+                            userQuestion={
+                              messages[index - 1]?.role === "user"
+                                ? messages[index - 1].content
+                                : ""
+                            }
                           />
                         )}
                       </div>
                     )}
                   </div>
 
-                  {/* Copy Button */}
-                  {!message.processing && !message.error && (
-                    <button
-                      onClick={() =>
-                        copyToClipboard(message.content, `${index}`)
-                      }
-                      className={`ml-3 p-2 rounded-lg ${
-                        message.role === "user"
-                          ? "text-yellow-800 hover:text-black hover:bg-yellow"
-                          : "text-gray-600 hover:text-black hover:bg-gray-100"
-                      }`}
-                      title="Copy message"
-                    >
-                      {copied === `${index}` ? (
-                        <CheckCircle className="h-4 w-4" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </button>
-                  )}
+                  {/* Copy Button - only for AI responses */}
+                  {!message.processing &&
+                    !message.error &&
+                    message.role === "assistant" && (
+                      <button
+                        onClick={() => {
+                          // Find the corresponding user message (previous message)
+                          const userMessage = messages[index - 1];
+                          const userPrompt =
+                            userMessage && userMessage.role === "user"
+                              ? `Question: ${userMessage.content}\n\n`
+                              : "";
+                          const fullContent = `${userPrompt}${message.content}`;
+                          copyToClipboard(fullContent, `${index}`);
+                        }}
+                        className="ml-3 p-2 rounded-lg text-gray-600 hover:text-black hover:bg-gray-100"
+                        title="Copy question and answer"
+                      >
+                        {copied === `${index}` ? (
+                          <CheckCircle className="h-4 w-4" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </button>
+                    )}
                 </div>
 
                 {/* Timestamp */}
@@ -305,8 +347,8 @@ export default function Chat() {
 
       {/* Input Form with accessible styling */}
       <div className="bg-white border-t border-gray-200 px-4 py-3">
-        <form onSubmit={handleSubmit} className="flex space-x-3">
-          <div className="flex-1">
+        <div className="flex space-x-4 items-end">
+          <div className="flex-1 mr-2">
             <div className="relative">
               <textarea
                 ref={inputRef}
@@ -314,7 +356,7 @@ export default function Chat() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask a question about HR1... (Press Enter to send, Shift+Enter for new line)"
-                className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:border-yellow bg-white text-sm text-black"
+                className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 pr-8 focus:outline-none focus:ring-2 focus:border-yellow bg-white text-sm text-black"
                 rows={1}
                 style={{
                   minHeight: "40px",
@@ -325,7 +367,11 @@ export default function Chat() {
               />
               {isLoading && (
                 <div className="absolute right-2 top-2">
-                  <Loader2 className="h-4 w-4 animate-spin text-yellow-800" />
+                  <img
+                    src="/images/loading-icon.png"
+                    alt="Loading..."
+                    className="h-4 w-4 animate-spin"
+                  />
                 </div>
               )}
             </div>
@@ -340,19 +386,26 @@ export default function Chat() {
               )}
             </div>
           </div>
-          <button
-            type="submit"
-            disabled={!input.trim() || isLoading || input.length > 1000}
-            className="bg-black text-white px-4 py-2 rounded-lg hover:bg-yellow hover:text-black focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 text-sm font-medium"
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-            <span>Send</span>
-          </button>
-        </form>
+          <div className="flex-shrink-0 ml-2">
+            <button
+              type="submit"
+              onClick={handleSubmit}
+              disabled={!input.trim() || isLoading || input.length > 1000}
+              className="bg-black text-white px-5 py-2 rounded-lg hover:bg-yellow hover:text-black focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 text-sm font-medium h-10"
+            >
+              {isLoading ? (
+                <img
+                  src="/images/loading-icon.png"
+                  alt="Loading..."
+                  className="h-4 w-4 animate-spin"
+                />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+              <span>Send</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -362,14 +415,17 @@ export default function Chat() {
 function AIResponse({
   content,
   sources,
+  userQuestion,
 }: {
   content: string;
   sources?: CitationSource[];
+  userQuestion?: string;
 }) {
   const [copied, setCopied] = useState<string | null>(null);
   const [expandedSources, setExpandedSources] = useState<Set<string>>(
     new Set()
   );
+  const [showSources, setShowSources] = useState(false);
 
   const copyToClipboard = async (text: string, id: string) => {
     try {
@@ -411,14 +467,15 @@ function AIResponse({
             <div className="w-2 h-2 bg-yellow rounded-full"></div>
             <span>Key Points</span>
           </h4>
-          <ul className="space-y-2 text-sm text-gray-800 ml-4">
+          <ul className="space-y-3 text-sm text-gray-800">
             {bulletPoints.map((point, index) => (
               <li key={index} className="flex items-start space-x-3">
-                <div
-                  className="w-2 h-2 rounded-full mt-2 flex-shrink-0"
-                  style={{ backgroundColor: "#8D3214" }}
-                ></div>
-                <span>{point.replace(/^[•-]\s*/, "")}</span>
+                <span className="text-black font-bold text-sm flex-shrink-0 mt-0.5 w-4">
+                  {index + 1}.
+                </span>
+                <span className="leading-relaxed">
+                  {point.replace(/^[•-]\s*/, "")}
+                </span>
               </li>
             ))}
           </ul>
@@ -441,86 +498,112 @@ function AIResponse({
       {/* Citations */}
       {sources && sources.length > 0 && (
         <div>
-          <h4 className="font-semibold text-black mb-3 flex items-center space-x-2">
-            <div className="w-2 h-2 bg-yellow rounded-full"></div>
-            <span>Sources from HR1 Bill</span>
-          </h4>
-          <div className="space-y-3">
-            {sources.map((source, sourceIndex) => {
-              const isExpanded = expandedSources.has(source.id);
-              const truncatedText = source.text.substring(0, 600);
-              const needsTruncation = source.text.length > 600;
-              const displayText = isExpanded ? source.text : truncatedText;
+          <button
+            onClick={() => setShowSources(!showSources)}
+            className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors mb-3"
+          >
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-yellow rounded-full"></div>
+              <span className="font-semibold text-black">
+                Sources from HR1 Bill
+              </span>
+              <div className="bg-gray-300 text-gray-700 px-2 py-1 rounded-lg text-xs font-medium">
+                {sources.length}
+              </div>
+            </div>
+            <div className="flex items-center space-x-2 text-gray-600">
+              <span className="text-xs font-medium">
+                {showSources ? "Hide" : "Show"}
+              </span>
+              {showSources ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </div>
+          </button>
 
-              return (
-                <div
-                  key={source.id}
-                  className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 bg-yellow rounded-full flex items-center justify-center">
-                        <span className="text-black text-xs font-bold">
-                          {sourceIndex + 1}
+          {showSources && (
+            <div className="space-y-3">
+              {sources.map((source, sourceIndex) => {
+                const isExpanded = expandedSources.has(source.id);
+                const truncatedText = source.text.substring(0, 600);
+                const needsTruncation = source.text.length > 600;
+                const displayText = isExpanded ? source.text : truncatedText;
+
+                return (
+                  <div
+                    key={source.id}
+                    className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-6 h-6 bg-yellow rounded-full flex items-center justify-center">
+                          <span className="text-black text-xs font-bold">
+                            {sourceIndex + 1}
+                          </span>
+                        </div>
+                        <span className="font-semibold text-black">
+                          {source.section || "HR1 Bill"}
                         </span>
+                        <div
+                          className="bg-yellow text-black px-3 py-1 rounded-lg text-xs font-medium cursor-help whitespace-nowrap"
+                          title="Relevancy Match % - how well this text matches your question"
+                        >
+                          {Math.round(source.score * 100)}%
+                        </div>
                       </div>
-                      <span className="font-semibold text-black">
-                        {source.section || "HR1 Bill"}
-                      </span>
-                      <div
-                        className="bg-yellow text-black px-3 py-1 rounded-lg text-xs font-medium cursor-help whitespace-nowrap"
-                        title="Relevance score as percentage - how well this text matches your question"
+                      <button
+                        onClick={() => {
+                          const questionPart = userQuestion
+                            ? `Question: ${userQuestion}\n\n`
+                            : "";
+                          const bulletSummary = bulletPoints.join("\n");
+                          const fullText = `${questionPart}${bulletSummary}\n\nSource: ${source.text}`;
+                          copyToClipboard(fullText, `source-${source.id}`);
+                        }}
+                        className="text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg p-1"
+                        title="Copy question, summary + source text"
                       >
-                        {Math.round(source.score * 100)}%
-                      </div>
+                        {copied === `source-${source.id}` ? (
+                          <CheckCircle className="h-4 w-4" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </button>
                     </div>
-                    <button
-                      onClick={() => {
-                        const bulletSummary = bulletPoints.join("\n");
-                        const fullText = `${bulletSummary}\n\nSource: ${source.text}`;
-                        copyToClipboard(fullText, `source-${source.id}`);
-                      }}
-                      className="text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg p-1"
-                      title="Copy summary + full text"
-                    >
-                      {copied === `source-${source.id}` ? (
-                        <CheckCircle className="h-4 w-4" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
+                    <p className="text-gray-700 leading-relaxed">
+                      {displayText}
+                      {needsTruncation && !isExpanded && (
+                        <>
+                          ...{" "}
+                          <button
+                            onClick={() => toggleSourceExpanded(source.id)}
+                            className="inline-flex items-center text-gray-600 hover:text-black hover:bg-gray-100 rounded p-1 ml-1"
+                            title="Show more"
+                          >
+                            <ChevronDown className="h-3 w-3" />
+                          </button>
+                        </>
                       )}
-                    </button>
+                      {needsTruncation && isExpanded && (
+                        <>
+                          {" "}
+                          <button
+                            onClick={() => toggleSourceExpanded(source.id)}
+                            className="inline-flex items-center text-gray-600 hover:text-black hover:bg-gray-100 rounded p-1 ml-1"
+                            title="Show less"
+                          >
+                            <ChevronUp className="h-3 w-3" />
+                          </button>
+                        </>
+                      )}
+                    </p>
                   </div>
-                  <p className="text-gray-700 leading-relaxed">
-                    {displayText}
-                    {needsTruncation && !isExpanded && (
-                      <>
-                        ...{" "}
-                        <button
-                          onClick={() => toggleSourceExpanded(source.id)}
-                          className="inline-flex items-center text-gray-600 hover:text-black hover:bg-gray-100 rounded p-1 ml-1"
-                          title="Show more"
-                        >
-                          <ChevronDown className="h-3 w-3" />
-                        </button>
-                      </>
-                    )}
-                    {needsTruncation && isExpanded && (
-                      <>
-                        {" "}
-                        <button
-                          onClick={() => toggleSourceExpanded(source.id)}
-                          className="inline-flex items-center text-gray-600 hover:text-black hover:bg-gray-100 rounded p-1 ml-1"
-                          title="Show less"
-                        >
-                          <ChevronUp className="h-3 w-3" />
-                        </button>
-                      </>
-                    )}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>
