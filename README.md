@@ -228,3 +228,4 @@ This project is licensed under the MIT License.
 - HR1 bill text from GovTrack.us
 - Built with Vercel AI SDK
 - Powered by OpenAI and Pinecone
+# Force deploy Tue Jun 10 20:04:24 PDT 2025
