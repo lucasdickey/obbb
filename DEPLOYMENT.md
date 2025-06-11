@@ -168,4 +168,6 @@ Set `DEBUG=true` in environment variables for verbose logging.
 
 **🎉 Your OB3.chat HR1 Assistant should now be live!**
 
+**✨ Now powered by OpenAI's o3 model** - the latest reasoning model for enhanced accuracy and deeper analysis of HR1 legislation!
+
 Share your deployment URL and start helping people understand the One Big Beautiful Bill Act!

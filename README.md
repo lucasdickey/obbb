@@ -12,7 +12,7 @@ This application provides an intelligent Q&A interface for exploring the "For th
 - **Backend**: Next.js API routes
 - **Vector Store**: Pinecone (primary), Supabase pgvector (fallback)
 - **Embedding Model**: OpenAI text-embedding-ada-002
-- **LLM**: OpenAI GPT-3.5 Turbo (default), GPT-4 optional
+- **LLM**: OpenAI o3 (latest reasoning model)
 - **UI**: Tailwind CSS
 - **Data Format**: Plain text chunks with metadata
 
@@ -230,5 +230,7 @@ This project is licensed under the MIT License.
 - Powered by OpenAI and Pinecone
 - Built by Apes On Keys with Lucas Dickey driving
 - MIT License Lucas Dickey 2025
+
 # Force deploy Tue Jun 10 20:04:24 PDT 2025
+
 # Remove auth protection Tue Jun 10 20:47:55 PDT 2025

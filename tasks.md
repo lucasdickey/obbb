@@ -6,7 +6,7 @@ Project Structure
 • Backend: Next.js API routes (Node.js / TypeScript)
 • Vector Store: Pinecone (preferred), with optional fallback to Supabase pgvector
 • Embedding Model: OpenAI text-embedding-ada-002
-• LLM for Q&A: OpenAI GPT-3.5 Turbo (default), GPT-4 optional
+• LLM for Q&A: OpenAI o3 (latest reasoning model)
 • Data Format: Plain text chunks of HR1 with metadata
 
 Tasks

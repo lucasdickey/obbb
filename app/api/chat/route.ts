@@ -217,7 +217,7 @@ EXAMPLE FORMAT:
 This is the detailed explanation that expands on the bullet points above. It should be written in paragraph form without any bullet points, providing comprehensive context and analysis based on the excerpts provided.`;
 
       const completion = await openaiClient.chat.completions.create({
-        model: "gpt-4",
+        model: "o3",
         messages: [
           {
             role: "system",
