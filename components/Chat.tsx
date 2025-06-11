@@ -143,13 +143,16 @@ export default function Chat() {
     <div className="flex flex-col h-screen bg-peach">
       {/* Header with accessible styling */}
       <div className="bg-black shadow-lg">
-        <div className="bg-white border-b px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="flex-shrink-0">
+        <div
+          className="border-b px-4 py-3 flex items-center justify-between"
+          style={{ backgroundColor: "#FFF3DC" }}
+        >
+          <div className="flex items-center">
+            <div className="flex-shrink-0" style={{ marginRight: "24px" }}>
               <img
                 src="/images/header-image-hr1.png"
                 alt="HR1 One Big Beautiful Bill"
-                className="h-12 w-12 object-contain"
+                className="h-20 w-20 object-contain"
               />
             </div>
             <div>
@@ -177,42 +180,41 @@ export default function Chat() {
       {/* Messages with accessible styling */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {messages.length === 0 && (
-          <div className="py-8">
-            <div className="max-w-6xl mx-auto">
-              <div className="flex flex-col lg:flex-row items-center justify-center space-y-8 lg:space-y-0 lg:space-x-12">
-                {/* Landing Image */}
-                <div className="flex-shrink-0">
-                  <img
-                    src="/images/initial-landing-image.png"
-                    alt="One Big Beautiful Bill - HR1 2025"
-                    className="w-80 h-80 object-contain"
-                  />
-                </div>
+          <div className="w-full max-w-4xl mx-auto flex flex-col md:flex-row items-stretch justify-center gap-8 p-4 h-full">
+            {/* Left Column: Image */}
+            <div className="w-full md:w-1/2 flex justify-center md:justify-end">
+              <div className="w-[280px] md:w-full md:max-w-[320px] h-[280px] md:h-auto rounded-lg overflow-hidden border-4 border-red-600 flex-shrink-0">
+                <img
+                  src="/images/initial-landing-image-small.png"
+                  alt="One Big Beautiful Bill - HR1 2025"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            </div>
 
-                {/* Welcome Content */}
-                <div className="bg-yellow-light border border-yellow rounded-lg p-6 max-w-md">
-                  <div className="bg-yellow rounded-full p-2 w-12 h-12 mx-auto mb-4">
-                    <Info className="h-8 w-8 text-black mx-auto" />
-                  </div>
-                  <h3 className="text-lg font-bold text-black mb-2 text-center">
-                    Welcome to HR1 Q&A
-                  </h3>
-                  <p className="text-gray-700 mb-4 text-sm text-center">
-                    Ask me anything about the HR1 "One Big Beautiful Bill Act" -
-                    tax relief, border security, energy policy, healthcare, and
-                    more.
-                  </p>
-                  <div className="text-xs text-gray-600 space-y-2 bg-white rounded-lg p-3">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-yellow rounded-full"></div>
+            {/* Right Column: Content Panel */}
+            <div className="w-full md:w-1/2 flex">
+              <div className="bg-yellow-light border border-yellow rounded-lg p-6 flex-1 flex flex-col justify-center">
+                <h2 className="text-2xl font-bold text-black mb-2">
+                  Dig into House Resolution 1
+                </h2>
+                <p className="text-gray-700 mb-6 text-base">
+                  Ask questions about the 2025 "One Big Beautiful Bill Act" -
+                  explore tax relief, border security, energy policy, healthcare
+                  reforms, and more with AI-powered analysis.
+                </p>
+                <div className="bg-white rounded-lg p-4 shadow-sm">
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <div className="flex items-start space-x-2">
+                      <span>•</span>
                       <p>"What does HR1 say about tax relief?"</p>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-yellow rounded-full"></div>
+                    <div className="flex items-start space-x-2">
+                      <span>•</span>
                       <p>"How does HR1 address border security?"</p>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-yellow rounded-full"></div>
+                    <div className="flex items-start space-x-2">
+                      <span>•</span>
                       <p>"What are the energy provisions in HR1?"</p>
                     </div>
                   </div>
@@ -347,7 +349,7 @@ export default function Chat() {
 
       {/* Input Form with accessible styling */}
       <div className="bg-white border-t border-gray-200 px-4 py-3">
-        <div className="flex space-x-4 items-end">
+        <div className="flex space-x-4 items-center">
           <div className="flex-1 mr-2">
             <div className="relative">
               <textarea
@@ -357,10 +359,10 @@ export default function Chat() {
                 onKeyDown={handleKeyDown}
                 placeholder="Ask a question about HR1... (Press Enter to send, Shift+Enter for new line)"
                 className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 pr-8 focus:outline-none focus:ring-2 focus:border-yellow bg-white text-sm text-black"
-                rows={1}
+                rows={2}
                 style={{
-                  minHeight: "40px",
-                  maxHeight: "80px",
+                  minHeight: "80px",
+                  maxHeight: "160px",
                   resize: "none",
                 }}
                 disabled={isLoading}
