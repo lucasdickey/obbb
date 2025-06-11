@@ -244,9 +244,20 @@ This is the detailed explanation that expands on the bullet points above. It sho
     } catch (serviceError) {
       console.error("AI service error:", serviceError);
 
-      // Return a helpful fallback response
+      // More detailed error logging for debugging
+      const errorMessage =
+        serviceError instanceof Error
+          ? serviceError.message
+          : String(serviceError);
+      console.error("Error details:", {
+        message: errorMessage,
+        stack: serviceError instanceof Error ? serviceError.stack : undefined,
+        query: query,
+      });
+
+      // Return a helpful fallback response with more specific error info
       return NextResponse.json({
-        response: `I encountered an issue while processing your question about "${query}". This might be due to API rate limits or temporary service unavailability. Please try again in a moment.`,
+        response: `I encountered an issue while processing your question about "${query}". Error: ${errorMessage}. This might be due to API rate limits or temporary service unavailability. Please try again in a moment.`,
         sources: [],
         processingTime: Date.now() - startTime,
       });
