@@ -7,20 +7,36 @@ let ratelimit: any = null;
 
 async function initializeOpenAI() {
   if (!openai) {
-    const OpenAI = (await import("openai")).default;
-    openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    try {
+      const OpenAI = (await import("openai")).default;
+      if (!process.env.OPENAI_API_KEY) {
+        throw new Error("OPENAI_API_KEY not configured");
+      }
+      openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+    } catch (error) {
+      console.error("Failed to initialize OpenAI:", error);
+      throw error;
+    }
   }
   return openai;
 }
 
 async function initializePinecone() {
   if (!pinecone) {
-    const { Pinecone } = await import("@pinecone-database/pinecone");
-    pinecone = new Pinecone({
-      apiKey: process.env.PINECONE_API_KEY!,
-    });
+    try {
+      const { Pinecone } = await import("@pinecone-database/pinecone");
+      if (!process.env.PINECONE_API_KEY) {
+        throw new Error("PINECONE_API_KEY not configured");
+      }
+      pinecone = new Pinecone({
+        apiKey: process.env.PINECONE_API_KEY!,
+      });
+    } catch (error) {
+      console.error("Failed to initialize Pinecone:", error);
+      throw error;
+    }
   }
   return pinecone;
 }
@@ -31,18 +47,23 @@ async function initializeRateLimit() {
     process.env.UPSTASH_REDIS_REST_URL &&
     process.env.UPSTASH_REDIS_REST_TOKEN
   ) {
-    const { Ratelimit } = await import("@upstash/ratelimit");
-    const { Redis } = await import("@upstash/redis");
+    try {
+      const { Ratelimit } = await import("@upstash/ratelimit");
+      const { Redis } = await import("@upstash/redis");
 
-    const redis = new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-    });
+      const redis = new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+      });
 
-    ratelimit = new Ratelimit({
-      redis: redis,
-      limiter: Ratelimit.slidingWindow(10, "1 m"),
-    });
+      ratelimit = new Ratelimit({
+        redis: redis,
+        limiter: Ratelimit.slidingWindow(10, "1 m"),
+      });
+    } catch (error) {
+      console.error("Failed to initialize rate limiting:", error);
+      // Rate limiting is optional, so don't throw
+    }
   }
   return ratelimit;
 }
@@ -116,52 +137,65 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Initialize services
-    const openaiClient = await initializeOpenAI();
-    const pineconeClient = await initializePinecone();
+    // Check if AI services are available
+    const hasOpenAI = !!process.env.OPENAI_API_KEY;
+    const hasPinecone = !!process.env.PINECONE_API_KEY;
 
-    // Step 1: Generate embedding for the user query
-    const embeddingResponse = await openaiClient.embeddings.create({
-      model: "text-embedding-ada-002",
-      input: query,
-    });
-
-    const queryEmbedding = embeddingResponse.data[0].embedding;
-
-    // Step 2: Search Pinecone for relevant chunks
-    const index = pineconeClient.index(
-      process.env.PINECONE_INDEX_NAME || "obbb"
-    );
-    const searchResponse = await index.query({
-      vector: queryEmbedding,
-      topK: 5,
-      includeMetadata: true,
-      includeValues: false,
-    });
-
-    // Step 3: Filter and format results
-    const relevantChunks = searchResponse.matches
-      .filter((match: any) => (match.score || 0) > 0.7) // Relevance threshold
-      .map((match: any) => ({
-        id: match.id,
-        text: match.metadata?.text as string,
-        section: match.metadata?.section as string,
-        chunkIndex: match.metadata?.chunkIndex as number,
-        score: match.score || 0,
-      }))
-      .filter((chunk: any) => chunk.text && chunk.text.length > 0);
-
-    if (relevantChunks.length === 0) {
+    if (!hasOpenAI || !hasPinecone) {
       return NextResponse.json({
-        response:
-          "I couldn't find relevant information in the HR1 bill to answer your question. Please try rephrasing your question or asking about a different aspect of the bill.",
+        response: `I'm currently unable to process your question about "${query}" because some AI services are not configured. Please contact the administrator to set up the required API keys.`,
         sources: [],
         processingTime: Date.now() - startTime,
       });
     }
 
-    // Step 4: Generate response with structured format
-    const prompt = `You are a helpful assistant answering questions about the HR1 "One Big Beautiful Bill Act" (119th Congress). 
+    try {
+      // Initialize services
+      const openaiClient = await initializeOpenAI();
+      const pineconeClient = await initializePinecone();
+
+      // Step 1: Generate embedding for the user query
+      const embeddingResponse = await openaiClient.embeddings.create({
+        model: "text-embedding-ada-002",
+        input: query,
+      });
+
+      const queryEmbedding = embeddingResponse.data[0].embedding;
+
+      // Step 2: Search Pinecone for relevant chunks
+      const index = pineconeClient.index(
+        process.env.PINECONE_INDEX_NAME || "obbb"
+      );
+      const searchResponse = await index.query({
+        vector: queryEmbedding,
+        topK: 5,
+        includeMetadata: true,
+        includeValues: false,
+      });
+
+      // Step 3: Filter and format results
+      const relevantChunks = searchResponse.matches
+        .filter((match: any) => (match.score || 0) > 0.7) // Relevance threshold
+        .map((match: any) => ({
+          id: match.id,
+          text: match.metadata?.text as string,
+          section: match.metadata?.section as string,
+          chunkIndex: match.metadata?.chunkIndex as number,
+          score: match.score || 0,
+        }))
+        .filter((chunk: any) => chunk.text && chunk.text.length > 0);
+
+      if (relevantChunks.length === 0) {
+        return NextResponse.json({
+          response:
+            "I couldn't find relevant information in the HR1 bill to answer your question. Please try rephrasing your question or asking about a different aspect of the bill.",
+          sources: [],
+          processingTime: Date.now() - startTime,
+        });
+      }
+
+      // Step 4: Generate response with structured format
+      const prompt = `You are a helpful assistant answering questions about the HR1 "One Big Beautiful Bill Act" (119th Congress). 
 
 Based on the following relevant excerpts from the bill, provide a comprehensive answer with this EXACT structure:
 
@@ -182,31 +216,41 @@ EXAMPLE FORMAT:
 
 This is the detailed explanation that expands on the bullet points above. It should be written in paragraph form without any bullet points, providing comprehensive context and analysis based on the excerpts provided.`;
 
-    const completion = await openaiClient.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are a knowledgeable legislative assistant. You MUST follow the exact format: bullet points first (each starting with •), then a blank line, then prose explanation. Never mix bullets and prose together.",
-        },
-        { role: "user", content: prompt },
-      ],
-      max_tokens: 800,
-      temperature: 0.1,
-    });
+      const completion = await openaiClient.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a knowledgeable legislative assistant. You MUST follow the exact format: bullet points first (each starting with •), then a blank line, then prose explanation. Never mix bullets and prose together.",
+          },
+          { role: "user", content: prompt },
+        ],
+        max_tokens: 800,
+        temperature: 0.1,
+      });
 
-    const response =
-      completion.choices[0]?.message?.content || "No response generated";
+      const response =
+        completion.choices[0]?.message?.content || "No response generated";
 
-    // Step 5: Return response with citations
-    const chatResponse: ChatResponse = {
-      response,
-      sources: relevantChunks,
-      processingTime: Date.now() - startTime,
-    };
+      // Step 5: Return response with citations
+      const chatResponse: ChatResponse = {
+        response,
+        sources: relevantChunks,
+        processingTime: Date.now() - startTime,
+      };
 
-    return NextResponse.json(chatResponse);
+      return NextResponse.json(chatResponse);
+    } catch (serviceError) {
+      console.error("AI service error:", serviceError);
+
+      // Return a helpful fallback response
+      return NextResponse.json({
+        response: `I encountered an issue while processing your question about "${query}". This might be due to API rate limits or temporary service unavailability. Please try again in a moment.`,
+        sources: [],
+        processingTime: Date.now() - startTime,
+      });
+    }
   } catch (error) {
     console.error("Chat API error:", error);
 
