@@ -228,4 +228,6 @@ This project is licensed under the MIT License.
 - HR1 bill text from GovTrack.us
 - Built with Vercel AI SDK
 - Powered by OpenAI and Pinecone
+- Built by Apes On Keys with Lucas Dickey driving
+- MIT License Lucas Dickey 2025
 # Force deploy Tue Jun 10 20:04:24 PDT 2025
