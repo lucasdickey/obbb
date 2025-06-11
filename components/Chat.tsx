@@ -10,6 +10,8 @@ import {
   Info,
   ChevronDown,
   ChevronUp,
+  Github,
+  Twitter,
 } from "lucide-react";
 
 interface ChatMessage {
@@ -406,6 +408,52 @@ export default function Chat() {
               )}
               <span>Send</span>
             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="bg-gray-50 border-t border-gray-200 px-4 py-3">
+        <div className="flex items-center justify-center space-x-4 text-xs text-gray-600">
+          <span>
+            Built by{" "}
+            <a
+              href="https://www.a-ok.shop"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-black font-medium hover:underline"
+            >
+              The A-OK Collective
+            </a>
+          </span>
+          <div className="flex items-center space-x-3">
+            <a
+              href="https://github.com/lucasdickey/obbb"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-600 hover:text-black transition-colors"
+              title="View on GitHub"
+            >
+              <Github className="h-4 w-4" />
+            </a>
+            <a
+              href="https://x.com/apesonkeys"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-600 hover:text-black transition-colors"
+              title="@apesonkeys on X"
+            >
+              <Twitter className="h-4 w-4" />
+            </a>
+            <a
+              href="https://x.com/lucasdickey04"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-600 hover:text-black transition-colors"
+              title="@lucasdickey04 on X"
+            >
+              <Twitter className="h-4 w-4" />
+            </a>
           </div>
         </div>
       </div>
