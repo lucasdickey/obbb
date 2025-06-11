@@ -6,14 +6,6 @@
       "ENABLE_EXPERIMENTAL_COREPACK": "1"
     }
   },
-  "env": {
-    "OPENAI_API_KEY": "$OPENAI_API_KEY",
-    "PINECONE_API_KEY": "$PINECONE_API_KEY",
-    "PINECONE_ENVIRONMENT": "$PINECONE_ENVIRONMENT",
-    "PINECONE_INDEX_NAME": "$PINECONE_INDEX_NAME",
-    "UPSTASH_REDIS_REST_URL": "$UPSTASH_REDIS_REST_URL",
-    "UPSTASH_REDIS_REST_TOKEN": "$UPSTASH_REDIS_REST_TOKEN"
-  },
   "functions": {
     "app/api/chat/route.ts": {
       "maxDuration": 30
