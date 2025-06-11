@@ -446,11 +446,11 @@ export default function Chat() {
               <Twitter className="h-4 w-4" />
             </a>
             <a
-              href="https://x.com/lucasdickey04"
+              href="https://x.com/lucasdickey4"
               target="_blank"
               rel="noopener noreferrer"
               className="text-gray-600 hover:text-black transition-colors"
-              title="@lucasdickey04 on X"
+              title="@04 on X"
             >
               <Twitter className="h-4 w-4" />
             </a>
