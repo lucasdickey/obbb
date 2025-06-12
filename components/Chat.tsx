@@ -499,13 +499,37 @@ function AIResponse({
 
   // Parse the response into bullet points and prose
   const lines = content.split("\n").filter((line) => line.trim());
-  const bulletPoints = lines.filter(
-    (line) => line.trim().startsWith("•") || line.trim().startsWith("-")
-  );
+
+  // Check for emoji bullet points (lines that start with an emoji)
+  // Simple check for common emojis used in the examples
+  const isEmojiLine = (line: string) => {
+    const trimmed = line.trim();
+    const firstChar = trimmed.charAt(0);
+    // Check if first character is likely an emoji (high Unicode range)
+    return (
+      firstChar &&
+      firstChar.charCodeAt(0) > 127 &&
+      !trimmed.startsWith("•") &&
+      !trimmed.startsWith("-")
+    );
+  };
+
+  const bulletPoints = lines.filter((line) => {
+    const trimmed = line.trim();
+    return (
+      trimmed.startsWith("•") || trimmed.startsWith("-") || isEmojiLine(line)
+    );
+  });
+
   const proseContent = lines
-    .filter(
-      (line) => !line.trim().startsWith("•") && !line.trim().startsWith("-")
-    )
+    .filter((line) => {
+      const trimmed = line.trim();
+      return (
+        !trimmed.startsWith("•") &&
+        !trimmed.startsWith("-") &&
+        !isEmojiLine(line)
+      );
+    })
     .join(" ");
 
   return (
@@ -518,16 +542,24 @@ function AIResponse({
             <span>Key Points</span>
           </h4>
           <ul className="space-y-3 text-sm text-gray-800">
-            {bulletPoints.map((point, index) => (
-              <li key={index} className="flex items-start space-x-3">
-                <span className="text-black font-bold text-sm flex-shrink-0 mt-0.5 w-4">
-                  {index + 1}.
-                </span>
-                <span className="leading-relaxed">
-                  {point.replace(/^[•-]\s*/, "")}
-                </span>
-              </li>
-            ))}
+            {bulletPoints.map((point, index) => {
+              const trimmed = point.trim();
+              const isEmoji = isEmojiLine(point);
+              const cleanPoint = isEmoji
+                ? trimmed
+                : trimmed.replace(/^[•-]\s*/, "");
+
+              return (
+                <li key={index} className="flex items-start space-x-3">
+                  {!isEmoji && (
+                    <span className="text-black font-bold text-sm flex-shrink-0 mt-0.5 w-4">
+                      {index + 1}.
+                    </span>
+                  )}
+                  <span className="leading-relaxed">{cleanPoint}</span>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

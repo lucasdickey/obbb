@@ -64,7 +64,9 @@ async function initializeRateLimit() {
   if (
     !ratelimit &&
     process.env.UPSTASH_REDIS_REST_URL &&
-    process.env.UPSTASH_REDIS_REST_TOKEN
+    process.env.UPSTASH_REDIS_REST_TOKEN &&
+    process.env.UPSTASH_REDIS_REST_URL !== "your_upstash_redis_url_here" &&
+    process.env.UPSTASH_REDIS_REST_URL.startsWith("https://")
   ) {
     try {
       const { Ratelimit } = await import("@upstash/ratelimit");
@@ -224,9 +226,11 @@ export async function POST(req: NextRequest) {
 
 Based on the following relevant excerpts from the bill, provide a comprehensive answer with this EXACT structure:
 
-FIRST: 3-5 bullet points starting with "•" (each on a new line)
+FIRST: 3-5 bullet points using relevant emojis (each on a new line)
 THEN: A blank line
 THEN: A detailed prose explanation (multiple sentences, no bullets)
+
+Use emojis that match the content (e.g., 🚫 for restrictions, 📖 for definitions, 💰 for money, 🏥 for healthcare, 📊 for reporting, ⚖️ for legal, 🛡️ for security, 🏛️ for government, etc.)
 
 Question: ${query}
 
@@ -234,15 +238,16 @@ Relevant excerpts from HR1:
 ${relevantChunks.map((chunk: any, i: number) => `[${i + 1}] ${chunk.text}`).join("\n\n")}
 
 EXAMPLE FORMAT:
-• Key point about the bill's main provision
-• Another important aspect mentioned in the excerpts  
-• Third key finding from the text
-• Additional detail if relevant
+🚫 10-year moratorium on state AI regulations for interstate commerce
+📖 AI definitions referencing the National AI Initiative Act of 2020
+💰 $500 million appropriation for AI/automation modernization
+🏥 AI tools mandate for Medicare fraud detection
+📊 Congressional reporting requirements on AI effectiveness
 
 This is the detailed explanation that expands on the bullet points above. It should be written in paragraph form without any bullet points, providing comprehensive context and analysis based on the excerpts provided.`;
 
       const systemMessage =
-        "You are a knowledgeable legislative assistant. You MUST follow the exact format: bullet points first (each starting with •), then a blank line, then prose explanation. Never mix bullets and prose together.";
+        "You are a knowledgeable legislative assistant. You MUST follow the exact format: emoji bullet points first (each starting with an emoji), then a blank line, then prose explanation. Never mix bullets and prose together. Do not include any <think> tags or reasoning steps in your response - only provide the final answer.";
 
       let completion;
       let usedProvider = "";
@@ -311,9 +316,14 @@ This is the detailed explanation that expands on the bullet points above. It sho
       const response =
         completion.choices[0]?.message?.content || "No response generated";
 
+      // Filter out <think> tags and any content within them
+      const cleanResponse = response
+        .replace(/<think>[\s\S]*?<\/think>/gi, "")
+        .trim();
+
       // Step 5: Return response with citations and provider info
       const chatResponse: ChatResponse = {
-        response,
+        response: cleanResponse,
         sources: relevantChunks,
         processingTime: Date.now() - startTime,
         provider: usedProvider, // Add provider info for debugging
