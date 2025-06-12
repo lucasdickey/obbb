@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import Groq from "groq-sdk";
 
 // Lazy load dependencies to prevent initialization errors
 let openai: any = null;
 let pinecone: any = null;
+let groq: any = null;
 let ratelimit: any = null;
 
 async function initializeOpenAI() {
@@ -21,6 +23,23 @@ async function initializeOpenAI() {
     }
   }
   return openai;
+}
+
+async function initializeGroq() {
+  if (!groq) {
+    try {
+      if (!process.env.GROQ_API_KEY) {
+        throw new Error("GROQ_API_KEY not configured");
+      }
+      groq = new Groq({
+        apiKey: process.env.GROQ_API_KEY,
+      });
+    } catch (error) {
+      console.error("Failed to initialize Groq:", error);
+      throw error;
+    }
+  }
+  return groq;
 }
 
 async function initializePinecone() {
@@ -90,6 +109,7 @@ interface ChatResponse {
   response: string;
   sources: CitationSource[];
   processingTime: number;
+  provider: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -140,6 +160,11 @@ export async function POST(req: NextRequest) {
     // Check if AI services are available
     const hasOpenAI = !!process.env.OPENAI_API_KEY;
     const hasPinecone = !!process.env.PINECONE_API_KEY;
+    const hasGroq = !!process.env.GROQ_API_KEY;
+
+    // Configurable toggle: PREFER_GROQ=true means Groq first, OpenAI fallback
+    // PREFER_GROQ=false means OpenAI first, Groq fallback
+    const preferGroq = process.env.PREFER_GROQ === "true";
 
     if (!hasOpenAI || !hasPinecone) {
       return NextResponse.json({
@@ -194,7 +219,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // Step 4: Generate response with structured format
+      // Step 4: Generate response with configurable primary/fallback
       const prompt = `You are a helpful assistant answering questions about the HR1 "One Big Beautiful Bill Act" (119th Congress). 
 
 Based on the following relevant excerpts from the bill, provide a comprehensive answer with this EXACT structure:
@@ -216,28 +241,82 @@ EXAMPLE FORMAT:
 
 This is the detailed explanation that expands on the bullet points above. It should be written in paragraph form without any bullet points, providing comprehensive context and analysis based on the excerpts provided.`;
 
-      const completion = await openaiClient.chat.completions.create({
-        model: "gpt-4o-mini", // Using gpt-4o-mini for reliable availability and cost efficiency
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a knowledgeable legislative assistant. You MUST follow the exact format: bullet points first (each starting with •), then a blank line, then prose explanation. Never mix bullets and prose together.",
-          },
-          { role: "user", content: prompt },
-        ],
-        max_tokens: 800,
-        temperature: 0.1,
-      });
+      const systemMessage =
+        "You are a knowledgeable legislative assistant. You MUST follow the exact format: bullet points first (each starting with •), then a blank line, then prose explanation. Never mix bullets and prose together.";
+
+      let completion;
+      let usedProvider = "";
+
+      // Configurable primary/fallback logic
+      if (preferGroq && hasGroq) {
+        // Try Groq first, fallback to OpenAI
+        try {
+          const groqClient = await initializeGroq();
+          completion = await groqClient.chat.completions.create({
+            model: "deepseek-r1-distill-llama-70b", // Advanced reasoning model
+            messages: [
+              { role: "system", content: systemMessage },
+              { role: "user", content: prompt },
+            ],
+            max_tokens: 800,
+            temperature: 0.1,
+          });
+          usedProvider = "Groq (DeepSeek-R1)";
+        } catch (groqError) {
+          console.log("Groq failed, falling back to OpenAI:", groqError);
+          completion = await openaiClient.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+              { role: "system", content: systemMessage },
+              { role: "user", content: prompt },
+            ],
+            max_tokens: 800,
+            temperature: 0.1,
+          });
+          usedProvider = "OpenAI (fallback)";
+        }
+      } else {
+        // Try OpenAI first, fallback to Groq
+        try {
+          completion = await openaiClient.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+              { role: "system", content: systemMessage },
+              { role: "user", content: prompt },
+            ],
+            max_tokens: 800,
+            temperature: 0.1,
+          });
+          usedProvider = "OpenAI";
+        } catch (openaiError) {
+          if (hasGroq) {
+            console.log("OpenAI failed, falling back to Groq:", openaiError);
+            const groqClient = await initializeGroq();
+            completion = await groqClient.chat.completions.create({
+              model: "deepseek-r1-distill-llama-70b",
+              messages: [
+                { role: "system", content: systemMessage },
+                { role: "user", content: prompt },
+              ],
+              max_tokens: 800,
+              temperature: 0.1,
+            });
+            usedProvider = "Groq (fallback)";
+          } else {
+            throw openaiError;
+          }
+        }
+      }
 
       const response =
         completion.choices[0]?.message?.content || "No response generated";
 
-      // Step 5: Return response with citations
+      // Step 5: Return response with citations and provider info
       const chatResponse: ChatResponse = {
         response,
         sources: relevantChunks,
         processingTime: Date.now() - startTime,
+        provider: usedProvider, // Add provider info for debugging
       };
 
       return NextResponse.json(chatResponse);

@@ -6,6 +6,7 @@ export async function GET(req: NextRequest) {
     hasPinecone: !!process.env.PINECONE_API_KEY,
     hasPineconeEnv: !!process.env.PINECONE_ENVIRONMENT,
     hasPineconeIndex: !!process.env.PINECONE_INDEX_NAME,
+    hasGroq: !!process.env.GROQ_API_KEY,
     hasUpstashUrl: !!process.env.UPSTASH_REDIS_REST_URL,
     hasUpstashToken: !!process.env.UPSTASH_REDIS_REST_TOKEN,
     nodeEnv: process.env.NODE_ENV,
@@ -13,6 +14,10 @@ export async function GET(req: NextRequest) {
     // Show partial keys for debugging (first 8 chars)
     openaiKeyPrefix: process.env.OPENAI_API_KEY?.substring(0, 8) || "none",
     pineconeKeyPrefix: process.env.PINECONE_API_KEY?.substring(0, 8) || "none",
+    groqKeyPrefix: process.env.GROQ_API_KEY?.substring(0, 8) || "none",
     pineconeIndexName: process.env.PINECONE_INDEX_NAME || "none",
+    // Configuration settings
+    preferGroq: process.env.PREFER_GROQ === "true",
+    preferGroqRaw: process.env.PREFER_GROQ || "not set",
   });
 }
