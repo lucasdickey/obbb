@@ -183,9 +183,9 @@ export default function Chat() {
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {messages.length === 0 && (
           <div className="w-full max-w-4xl mx-auto flex flex-col md:flex-row items-stretch justify-center gap-8 p-4 h-full">
-            {/* Left Column: Image */}
-            <div className="w-full md:w-1/2 flex justify-center md:justify-end">
-              <div className="w-[280px] md:w-full md:max-w-[320px] h-[280px] md:h-auto rounded-lg overflow-hidden border-4 border-red-600 flex-shrink-0">
+            {/* Left Column: Image (Hidden on Mobile) */}
+            <div className="hidden md:flex w-full md:w-1/2 justify-center md:justify-end">
+              <div className="w-[280px] md:w-full md:max-w-[320px] h-auto rounded-lg overflow-hidden border-4 border-red-600 flex-shrink-0">
                 <img
                   src="/images/initial-landing-image-small.png"
                   alt="One Big Beautiful Bill - HR1 2025"
@@ -194,7 +194,7 @@ export default function Chat() {
               </div>
             </div>
 
-            {/* Right Column: Content Panel */}
+            {/* Right Column: Content Panel (Full-width on Mobile) */}
             <div className="w-full md:w-1/2 flex">
               <div className="bg-yellow-light border border-yellow rounded-lg p-6 flex-1 flex flex-col justify-center">
                 <h2 className="text-2xl font-bold text-black mb-2">
