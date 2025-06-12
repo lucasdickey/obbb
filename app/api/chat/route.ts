@@ -168,9 +168,21 @@ export async function POST(req: NextRequest) {
     // PREFER_GROQ=false means OpenAI first, Groq fallback
     const preferGroq = process.env.PREFER_GROQ === "true";
 
+    // Debug logging for production issues
+    console.log("Service availability check:", {
+      hasOpenAI,
+      hasPinecone,
+      hasGroq,
+      preferGroq,
+      openaiKeyPrefix: process.env.OPENAI_API_KEY?.substring(0, 8) || "missing",
+      pineconeKeyPrefix:
+        process.env.PINECONE_API_KEY?.substring(0, 8) || "missing",
+      groqKeyPrefix: process.env.GROQ_API_KEY?.substring(0, 8) || "missing",
+    });
+
     if (!hasOpenAI || !hasPinecone) {
       return NextResponse.json({
-        response: `I'm currently unable to process your question about "${query}" because some AI services are not configured. Please contact the administrator to set up the required API keys.`,
+        response: `I'm currently unable to process your question about "${query}" because some AI services are not configured. Please contact the administrator to set up the required API keys. Missing: ${!hasOpenAI ? "OpenAI " : ""}${!hasPinecone ? "Pinecone" : ""}`,
         sources: [],
         processingTime: Date.now() - startTime,
       });
@@ -269,16 +281,24 @@ This is the detailed explanation that expands on the bullet points above. It sho
           usedProvider = "Groq (DeepSeek-R1)";
         } catch (groqError) {
           console.log("Groq failed, falling back to OpenAI:", groqError);
-          completion = await openaiClient.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages: [
-              { role: "system", content: systemMessage },
-              { role: "user", content: prompt },
-            ],
-            max_tokens: 800,
-            temperature: 0.1,
-          });
-          usedProvider = "OpenAI (fallback)";
+          try {
+            completion = await openaiClient.chat.completions.create({
+              model: "gpt-4o-mini",
+              messages: [
+                { role: "system", content: systemMessage },
+                { role: "user", content: prompt },
+              ],
+              max_tokens: 800,
+              temperature: 0.1,
+            });
+            usedProvider = "OpenAI (fallback)";
+          } catch (openaiError) {
+            console.error("Both Groq and OpenAI failed:", {
+              groqError,
+              openaiError,
+            });
+            throw openaiError; // Throw the OpenAI error since that's our primary fallback
+          }
         }
       } else {
         // Try OpenAI first, fallback to Groq
@@ -296,17 +316,25 @@ This is the detailed explanation that expands on the bullet points above. It sho
         } catch (openaiError) {
           if (hasGroq) {
             console.log("OpenAI failed, falling back to Groq:", openaiError);
-            const groqClient = await initializeGroq();
-            completion = await groqClient.chat.completions.create({
-              model: "deepseek-r1-distill-llama-70b",
-              messages: [
-                { role: "system", content: systemMessage },
-                { role: "user", content: prompt },
-              ],
-              max_tokens: 800,
-              temperature: 0.1,
-            });
-            usedProvider = "Groq (fallback)";
+            try {
+              const groqClient = await initializeGroq();
+              completion = await groqClient.chat.completions.create({
+                model: "deepseek-r1-distill-llama-70b",
+                messages: [
+                  { role: "system", content: systemMessage },
+                  { role: "user", content: prompt },
+                ],
+                max_tokens: 800,
+                temperature: 0.1,
+              });
+              usedProvider = "Groq (fallback)";
+            } catch (groqError) {
+              console.error("Both OpenAI and Groq failed:", {
+                openaiError,
+                groqError,
+              });
+              throw openaiError; // Throw the original OpenAI error
+            }
           } else {
             throw openaiError;
           }
