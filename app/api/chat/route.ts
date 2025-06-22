@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
+import { logQuestion } from "@/lib/supabase";
 
 // Lazy load dependencies to prevent initialization errors
 let openai: any = null;
@@ -116,6 +117,7 @@ interface ChatResponse {
 
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
+  let query: string = ""; // Declare query at the top level
 
   try {
     // Rate limiting (optional)
@@ -151,13 +153,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const query = userMessage.content.trim();
+    query = userMessage.content.trim();
     if (!query || query.length > 1000) {
       return NextResponse.json(
         { error: "Query must be between 1 and 1000 characters" },
         { status: 400 }
       );
     }
+
+    // Log the question immediately
+    await logQuestion({
+      question: query,
+      ip_address: req.ip,
+      user_agent: req.headers.get("user-agent") || undefined,
+    });
 
     // Check if AI services are available
     const hasOpenAI = !!process.env.OPENAI_API_KEY;
@@ -357,6 +366,17 @@ This is the detailed explanation that expands on the bullet points above. It sho
         provider: usedProvider, // Add provider info for debugging
       };
 
+      // After successful response, update the log with additional info
+      await logQuestion({
+        question: query,
+        processing_time: Date.now() - startTime,
+        provider: usedProvider,
+        has_sources: relevantChunks.length > 0,
+        source_count: relevantChunks.length,
+        ip_address: req.ip,
+        user_agent: req.headers.get("user-agent") || undefined,
+      });
+
       return NextResponse.json(chatResponse);
     } catch (serviceError) {
       console.error("AI service error:", serviceError);
@@ -372,6 +392,15 @@ This is the detailed explanation that expands on the bullet points above. It sho
         query: query,
       });
 
+      // Log error case
+      await logQuestion({
+        question: query,
+        processing_time: Date.now() - startTime,
+        error_message: errorMessage,
+        ip_address: req.ip,
+        user_agent: req.headers.get("user-agent") || undefined,
+      });
+
       // Return a helpful fallback response with more specific error info
       return NextResponse.json({
         response: `I encountered an issue while processing your question about "${query}". Error: ${errorMessage}. This might be due to API rate limits or temporary service unavailability. Please try again in a moment.`,
@@ -381,6 +410,17 @@ This is the detailed explanation that expands on the bullet points above. It sho
     }
   } catch (error) {
     console.error("Chat API error:", error);
+
+    // Log error case if we have a query
+    if (query) {
+      await logQuestion({
+        question: query,
+        processing_time: Date.now() - startTime,
+        error_message: error instanceof Error ? error.message : String(error),
+        ip_address: req.ip,
+        user_agent: req.headers.get("user-agent") || undefined,
+      });
+    }
 
     // Return appropriate error response
     if (error instanceof Error) {

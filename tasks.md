@@ -141,6 +141,92 @@ Future Enhancements
 • [ ] Offer summary per representative's consistency with HR1
 • [ ] Track document freshness or cache updates
 
+🏛️ State-Specific Impact Analysis (New Feature)
+Purpose
+Add state-specific metadata to HR1 chunks to enable users to filter content by how it impacts their state. This allows citizens to quickly find provisions that directly affect their state's economy, rights, infrastructure, or federal programs.
+
+Phase 1: Analysis & Preparation
+• [ ] Export existing chunks from Pinecone to analyze patterns
+• [ ] Manually review 50-100 chunks to identify state impact patterns
+• [ ] Create classification criteria document defining "state impact"
+• [ ] Identify keyword patterns for pre-filtering (funding, grants, infrastructure, etc.)
+• [ ] Design prompt templates optimized for token efficiency
+• [ ] Set up cost tracking spreadsheet for API usage
+
+Phase 2: Classification Pipeline Development
+• [ ] Create scripts/classify_state_impacts.ts
+• [ ] Implement chunk export from Pinecone with pagination
+• [ ] Build pre-filtering logic to exclude obvious non-impact chunks:
+  - Procedural language (definitions, effective dates, etc.)
+  - International relations without domestic impact
+  - Generic federal regulations without state specificity
+• [ ] Implement two-stage classification:
+  - Stage 1: Binary classification (has state impact: yes/no)
+  - Stage 2: State identification for impacted chunks
+• [ ] Create batch processing with 5-10 chunks per API call
+• [ ] Add GPT-4o-mini integration for cost-effective classification
+• [ ] Implement regex/keyword matching for obvious cases:
+  - Explicit state mentions
+  - Federal funding formulas
+  - Infrastructure projects by region
+• [ ] Add progress tracking and resumability
+• [ ] Create validation dataset for accuracy testing
+• [ ] Implement caching to avoid reprocessing
+• [ ] Add dry-run mode for testing
+
+Phase 3: Pinecone Metadata Update
+• [ ] Design new metadata schema with "states" array field
+• [ ] Create backup of existing Pinecone data
+• [ ] Implement batch update logic for Pinecone vectors
+• [ ] Add verification step to ensure updates are successful
+• [ ] Create rollback capability in case of errors
+• [ ] Update data ingestion script for future chunks
+
+Phase 4: Frontend State Filtering
+• [ ] Add state selector dropdown to Chat component
+• [ ] Implement all 50 states + DC + territories
+• [ ] Create "My State" preference with localStorage
+• [ ] Modify search query to include state metadata filter
+• [ ] Update prompt engineering to mention state context
+• [ ] Add visual indicator showing state filter is active
+• [ ] Create "nationwide impact" option for federal-level queries
+• [ ] Add state impact badges to citation display
+
+Phase 5: Testing & Optimization
+• [ ] Test classification accuracy on validation set
+• [ ] Measure API costs and optimize prompts
+• [ ] Performance test filtered queries
+• [ ] User test state selection UX
+• [ ] Create documentation for state impact criteria
+
+Cost Optimization Strategies
+• Use GPT-4o-mini ($0.15/1M input, $0.60/1M output tokens)
+• Aggressive pre-filtering to reduce chunks by 40-60%
+• Batch processing (5-10 chunks per API call)
+• Regex/keyword matching for obvious cases (save 20-30% API calls)
+• Cache all classifications to avoid reprocessing
+• Skip chunks under 100 tokens (usually boilerplate)
+
+Estimated Costs
+• Assuming ~2000 chunks after filtering
+• ~200-400 API calls with batching
+• Estimated tokens: ~500K input, ~100K output
+• Total cost: ~$0.15 (very affordable!)
+
+Implementation Order
+1. Build and test classification pipeline locally
+2. Process chunks in small batches to validate approach
+3. Run full classification after validation
+4. Update Pinecone metadata
+5. Implement frontend changes
+6. Deploy and monitor
+
+Success Metrics
+• [ ] 90%+ classification accuracy on validation set
+• [ ] Total API costs under $1
+• [ ] State filtering reduces results by 60-80% on average
+• [ ] User feedback shows improved relevance
+
 Notes
 • Use AWS credits only if Pinecone or embedding workloads exceed free tiers
 • Chunking and ingestion is one-time; no recurring job needed
