@@ -177,18 +177,6 @@ export async function POST(req: NextRequest) {
     // PREFER_GROQ=false means OpenAI first, Groq fallback
     const preferGroq = process.env.PREFER_GROQ === "true";
 
-    // Debug logging for production issues
-    console.log("Service availability check:", {
-      hasOpenAI,
-      hasPinecone,
-      hasGroq,
-      preferGroq,
-      openaiKeyPrefix: process.env.OPENAI_API_KEY?.substring(0, 8) || "missing",
-      pineconeKeyPrefix:
-        process.env.PINECONE_API_KEY?.substring(0, 8) || "missing",
-      groqKeyPrefix: process.env.GROQ_API_KEY?.substring(0, 8) || "missing",
-    });
-
     if (!hasOpenAI || !hasPinecone) {
       return NextResponse.json({
         response: `I'm currently unable to process your question about "${query}" because some AI services are not configured. Please contact the administrator to set up the required API keys. Missing: ${!hasOpenAI ? "OpenAI " : ""}${!hasPinecone ? "Pinecone" : ""}`,
@@ -235,15 +223,14 @@ export async function POST(req: NextRequest) {
 
       if (relevantChunks.length === 0) {
         return NextResponse.json({
-          response:
-            "I couldn't find relevant information in the HR1 bill to answer your question. Please try rephrasing your question or asking about a different aspect of the bill.",
+          response: "I couldn't find relevant information in the HR1 bill to answer your question. Please try rephrasing your question or asking about a different aspect of the bill.",
           sources: [],
           processingTime: Date.now() - startTime,
         });
       }
 
       // Step 4: Generate response with configurable primary/fallback
-      const prompt = `You are a helpful assistant answering questions about the HR1 "One Big Beautiful Bill Act" (119th Congress). 
+      const prompt = `You are a helpful assistant answering questions about the HR1 "One Big Beautiful Bill Act" (119th Congress).
 
 Based on the following relevant excerpts from the bill, provide a comprehensive answer with this EXACT structure:
 
@@ -267,8 +254,7 @@ EXAMPLE FORMAT:
 
 This is the detailed explanation that expands on the bullet points above. It should be written in paragraph form without any bullet points, providing comprehensive context and analysis based on the excerpts provided.`;
 
-      const systemMessage =
-        "You are a knowledgeable legislative assistant. You MUST follow the exact format: emoji bullet points first (each starting with an emoji), then a blank line, then prose explanation. Never mix bullets and prose together. Do not include any <think> tags or reasoning steps in your response - only provide the final answer.";
+      const systemMessage = "You are a knowledgeable legislative assistant. You MUST follow the exact format: emoji bullet points first (each starting with an emoji), then a blank line, then prose explanation. Never mix bullets and prose together. Do not include any <think> tags or reasoning steps in your response - only provide the final answer.";
 
       let completion;
       let usedProvider = "";
@@ -289,7 +275,7 @@ This is the detailed explanation that expands on the bullet points above. It sho
           });
           usedProvider = "Groq (DeepSeek-R1)";
         } catch (groqError) {
-          console.log("Groq failed, falling back to OpenAI:", groqError);
+          console.error("Groq failed, falling back to OpenAI:", groqError);
           try {
             completion = await openaiClient.chat.completions.create({
               model: "gpt-4o-mini",
@@ -324,7 +310,7 @@ This is the detailed explanation that expands on the bullet points above. It sho
           usedProvider = "OpenAI";
         } catch (openaiError) {
           if (hasGroq) {
-            console.log("OpenAI failed, falling back to Groq:", openaiError);
+            console.error("OpenAI failed, falling back to Groq:", openaiError);
             try {
               const groqClient = await initializeGroq();
               completion = await groqClient.chat.completions.create({

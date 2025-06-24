@@ -61,10 +61,10 @@ interface ClassificationProgress {
 }
 
 class StateImpactClassifier {
-  private openai: OpenAI;
-  private pinecone: Pinecone;
+  private openai!: OpenAI;
+  private pinecone!: Pinecone;
   private cache: Map<string, StateClassification> = new Map();
-  private progress: ClassificationProgress;
+  private progress!: ClassificationProgress;
 
   constructor(dryRun = false) {
     if (!dryRun) {
@@ -261,7 +261,7 @@ Return your analysis in this exact JSON format:
 Text chunks to analyze:
 ${chunks.map((chunk, i) => `
 CHUNK ${i + 1} (ID: ${chunk.id}):
-${chunk.metadata.text}
+${chunk.metadata?.text || chunk.metadata?.content || 'No text available'}
 
 ---`).join('\n')}
 
@@ -366,7 +366,7 @@ JSON Response:`;
         });
 
         if (response.vectors) {
-          allIds.push(...response.vectors.map(v => v.id));
+          allIds.push(...response.vectors.map(v => v.id).filter((id): id is string => typeof id === 'string'));
         }
 
         paginationToken = response.pagination?.next;

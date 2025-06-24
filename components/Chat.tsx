@@ -13,6 +13,7 @@ import {
   Github,
   Twitter,
 } from "lucide-react";
+import StateProvisionsDiscovery from "./StateProvisionsDiscovery";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -42,6 +43,7 @@ export default function Chat() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [isInputFocused, setIsInputFocused] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -75,6 +77,7 @@ export default function Chat() {
     setMessages((prev) => [...prev, userMessage, processingMessage]);
     setInput("");
     setIsLoading(true);
+    setIsInputFocused(false); // Collapse textarea after sending
 
     try {
       const response = await fetch("/api/chat", {
@@ -125,6 +128,15 @@ export default function Chat() {
     }
   };
 
+  // Handle input focus/blur for dynamic sizing
+  const handleInputFocus = () => {
+    setIsInputFocused(true);
+  };
+
+  const handleInputBlur = () => {
+    setIsInputFocused(false);
+  };
+
   // Copy to clipboard
   const copyToClipboard = async (text: string, messageId: string) => {
     try {
@@ -141,6 +153,12 @@ export default function Chat() {
     setMessages([]);
   };
 
+  // Handle starting a new chat from state provisions
+  const handleStartChatFromProvision = (prompt: string) => {
+    setInput(prompt);
+    inputRef.current?.focus();
+  };
+
   return (
     <div className="flex flex-col h-screen bg-peach">
       {/* Header with accessible styling */}
@@ -150,77 +168,101 @@ export default function Chat() {
           style={{ backgroundColor: "#FFF3DC" }}
         >
           <div className="flex items-center">
-            <div className="flex-shrink-0" style={{ marginRight: "24px" }}>
+            <div
+              className="hidden sm:flex flex-shrink-0"
+              style={{ marginRight: "24px" }}
+            >
               <img
                 src="/images/header-image-hr1.png"
                 alt="HR1 One Big Beautiful Bill"
-                className="h-20 w-20 object-contain"
+                className="h-12 w-12 object-contain"
               />
             </div>
             <div>
               <h1 className="text-xl font-bold text-black">
-                OB3.chat - One Big Beautiful Bill Act Chat assistant
+                <span className="sm:hidden">OB3.chat</span>
+                <span className="hidden sm:inline">
+                  OB3.chat - One Big Beautiful Bill Act Chat assistant
+                </span>
               </h1>
-              <p className="text-xs text-gray-600 font-medium">
-                Ask questions about the 2025 House Resolution 1, which was
-                passed and is on its way to the Senate for debate. <br />
-                It is highly likely a reconciliation will be necessary after the
-                Senate passes its own version of the bill.
-              </p>
             </div>
           </div>
-          <button
-            onClick={clearChat}
-            className="px-3 py-1 text-xs font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg border border-gray-200 disabled:opacity-50"
-            disabled={messages.length === 0}
-          >
-            Clear Chat
-          </button>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={clearChat}
+              className="px-3 py-1 text-xs font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg border border-gray-200 disabled:opacity-50"
+              disabled={messages.length === 0}
+            >
+              Clear Chat
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Messages with accessible styling */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {messages.length === 0 && (
-          <div className="w-full max-w-4xl mx-auto flex flex-col md:flex-row items-stretch justify-center gap-8 p-4 h-full">
-            {/* Left Column: Image (Hidden on Mobile) */}
-            <div className="hidden md:flex w-full md:w-1/2 justify-center md:justify-end">
-              <div className="w-[280px] md:w-full md:max-w-[320px] h-auto rounded-lg overflow-hidden border-4 border-red-600 flex-shrink-0">
-                <img
-                  src="/images/initial-landing-image-small.png"
-                  alt="One Big Beautiful Bill - HR1 2025"
-                  className="h-full w-full object-cover"
-                />
+          <div className="w-full max-w-7xl mx-auto p-6">
+            {/* Three Column Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+              {/* Column 1: Image (Hidden on Mobile) */}
+              <div className="hidden lg:flex flex-col">
+                <div className="bg-yellow-light border border-yellow rounded-lg p-6 h-full flex flex-col items-center justify-center">
+                  <div className="w-full max-w-[240px] rounded-lg overflow-hidden border-4 border-red-600">
+                    <img
+                      src="/images/initial-landing-image-small.png"
+                      alt="One Big Beautiful Bill - HR1 2025"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {/* Right Column: Content Panel (Full-width on Mobile) */}
-            <div className="w-full md:w-1/2 flex">
-              <div className="bg-yellow-light border border-yellow rounded-lg p-6 flex-1 flex flex-col justify-center">
-                <h2 className="text-2xl font-bold text-black mb-2">
-                  Dig into House Resolution 1
-                </h2>
-                <p className="text-gray-700 mb-6 text-base">
-                  Ask questions about the 2025 "One Big Beautiful Bill Act" -
-                  explore tax relief, border security, energy policy, healthcare
-                  reforms, and more with AI-powered analysis.
-                </p>
-                <div className="bg-white rounded-lg p-4 shadow-sm">
-                  <div className="space-y-2 text-sm text-gray-700">
-                    <div className="flex items-start space-x-2">
-                      <span>•</span>
-                      <p>"What does HR1 say about tax relief?"</p>
-                    </div>
-                    <div className="flex items-start space-x-2">
-                      <span>•</span>
-                      <p>"How does HR1 address border security?"</p>
-                    </div>
-                    <div className="flex items-start space-x-2">
-                      <span>•</span>
-                      <p>"What are the energy provisions in HR1?"</p>
+              {/* Column 2: Chat Description (Full width on mobile) */}
+              <div className="flex flex-col lg:col-span-1">
+                <div className="bg-yellow-light border border-yellow rounded-lg p-6 h-full flex flex-col">
+                  <h2 className="text-xl font-bold text-black mb-3">
+                    Explore H.R. 2025 via Chat
+                  </h2>
+                  <p className="text-gray-700 mb-4 text-sm leading-relaxed flex-grow">
+                    Ask questions about the 2025 "One Big Beautiful Bill Act" -
+                    explore tax relief, border security, energy policy,
+                    healthcare reforms, and more with AI-powered analysis. Chat
+                    as you would with ChatGPT or Claude—this is similar
+                    interface, but focused on the One Big Beautiful Bill Act.
+                  </p>
+                  <div className="bg-white rounded-lg p-4 shadow-sm mt-auto">
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <div className="flex items-start space-x-2">
+                        <span>•</span>
+                        <p>"What does HR1 say about tax relief?"</p>
+                      </div>
+                      <div className="flex items-start space-x-2">
+                        <span>•</span>
+                        <p>"How does HR1 address border security?"</p>
+                      </div>
+                      <div className="flex items-start space-x-2">
+                        <span>•</span>
+                        <p>"What are the energy provisions in HR1?"</p>
+                      </div>
+                      <div className="flex items-start space-x-2">
+                        <span>•</span>
+                        <p>"Are there any clauses about AI regulation?"</p>
+                      </div>
+                      <div className="flex items-start space-x-2">
+                        <span>•</span>
+                        <p>"How about subsidies for farmers ?"</p>
+                      </div>
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Column 3: State Discovery */}
+              <div className="flex flex-col lg:col-span-1">
+                <StateProvisionsDiscovery
+                  onStartChat={handleStartChatFromProvision}
+                />
               </div>
             </div>
           </div>
@@ -351,7 +393,7 @@ export default function Chat() {
 
       {/* Input Form with accessible styling */}
       <div className="bg-white border-t border-gray-200 px-4 py-3">
-        <div className="flex space-x-4 items-center">
+        <div className="flex space-x-4 items-start">
           <div className="flex-1 mr-2">
             <div className="relative">
               <textarea
@@ -359,12 +401,14 @@ export default function Chat() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
                 placeholder="Ask a question about HR1... (Press Enter to send, Shift+Enter for new line)"
-                className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 pr-8 focus:outline-none focus:ring-2 focus:border-yellow bg-white text-sm text-black"
-                rows={2}
+                className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 pr-8 focus:outline-none focus:ring-2 focus:border-yellow bg-white text-sm text-black transition-all duration-200"
+                rows={isInputFocused ? 3 : 1}
                 style={{
-                  minHeight: "80px",
-                  maxHeight: "160px",
+                  minHeight: isInputFocused ? "120px" : "40px",
+                  maxHeight: isInputFocused ? "120px" : "40px",
                   resize: "none",
                 }}
                 disabled={isLoading}
@@ -379,18 +423,8 @@ export default function Chat() {
                 </div>
               )}
             </div>
-            <div className="flex items-center justify-between mt-1">
-              <span className="text-xs text-gray-600">
-                {input.length}/1000 characters
-              </span>
-              {input.length > 1000 && (
-                <span className="text-xs text-red-600">
-                  Too long! Please shorten your question.
-                </span>
-              )}
-            </div>
           </div>
-          <div className="flex-shrink-0 ml-2">
+          <div className="flex-shrink-0 ml-2 flex flex-col items-end">
             <button
               type="submit"
               onClick={handleSubmit}
@@ -408,6 +442,12 @@ export default function Chat() {
               )}
               <span>Send</span>
             </button>
+            <div className="flex items-center justify-end mt-1">
+              <span className="text-xs text-gray-600">{input.length}/1000</span>
+              {input.length > 1000 && (
+                <span className="text-xs text-red-600 ml-2">Too long!</span>
+              )}
+            </div>
           </div>
         </div>
       </div>
