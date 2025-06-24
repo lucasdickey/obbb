@@ -1,16 +1,22 @@
 import { createClient } from "@supabase/supabase-js";
 
-if (!process.env.SUPABASE_URL) {
-  throw new Error("Missing SUPABASE_URL environment variable");
-}
-if (!process.env.SUPABASE_ANON_KEY) {
-  throw new Error("Missing SUPABASE_ANON_KEY environment variable");
+// Check if Supabase is properly configured (not just placeholder values)
+const isSupabaseConfigured = 
+  process.env.SUPABASE_URL && 
+  process.env.SUPABASE_ANON_KEY &&
+  !process.env.SUPABASE_URL.includes('your_supabase_url_here') &&
+  !process.env.SUPABASE_ANON_KEY.includes('your_supabase_anon_key_here');
+
+if (!isSupabaseConfigured) {
+  console.warn("Supabase is not properly configured. Logging will be disabled.");
 }
 
-export const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
+export const supabase = isSupabaseConfigured 
+  ? createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_ANON_KEY!
+    )
+  : null;
 
 export interface QuestionLog {
   question: string;
@@ -24,6 +30,11 @@ export interface QuestionLog {
 }
 
 export async function logQuestion(log: QuestionLog) {
+  if (!supabase) {
+    // Supabase not configured, skip logging
+    return;
+  }
+  
   try {
     const { error } = await supabase.from("user_questions").insert([log]);
 

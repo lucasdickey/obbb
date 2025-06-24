@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
-import { logQuestion } from "@/lib/supabase";
 
 // Lazy load dependencies to prevent initialization errors
 let openai: any = null;
@@ -90,6 +89,19 @@ async function initializeRateLimit() {
   return ratelimit;
 }
 
+async function initializeSupabase() {
+  try {
+    if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY && 
+        !process.env.SUPABASE_URL.includes('your_supabase_url_here')) {
+      const { logQuestion } = await import("@/lib/supabase");
+      return logQuestion;
+    }
+  } catch (error) {
+    console.error("Failed to initialize Supabase:", error);
+  }
+  return null;
+}
+
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
@@ -118,6 +130,7 @@ interface ChatResponse {
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
   let query: string = ""; // Declare query at the top level
+  let logQuestion: any = null; // Declare logQuestion at the top level
 
   try {
     // Rate limiting (optional)
@@ -161,12 +174,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Log the question immediately
-    await logQuestion({
-      question: query,
-      ip_address: req.ip,
-      user_agent: req.headers.get("user-agent") || undefined,
-    });
+    // Log the question immediately if Supabase is available
+    logQuestion = await initializeSupabase();
+    if (logQuestion) {
+      await logQuestion({
+        question: query,
+        ip_address: req.ip,
+        user_agent: req.headers.get("user-agent") || undefined,
+      });
+    }
 
     // Check if AI services are available
     const hasOpenAI = !!process.env.OPENAI_API_KEY;
@@ -353,15 +369,17 @@ This is the detailed explanation that expands on the bullet points above. It sho
       };
 
       // After successful response, update the log with additional info
-      await logQuestion({
-        question: query,
-        processing_time: Date.now() - startTime,
-        provider: usedProvider,
-        has_sources: relevantChunks.length > 0,
-        source_count: relevantChunks.length,
-        ip_address: req.ip,
-        user_agent: req.headers.get("user-agent") || undefined,
-      });
+      if (logQuestion) {
+        await logQuestion({
+          question: query,
+          processing_time: Date.now() - startTime,
+          provider: usedProvider,
+          has_sources: relevantChunks.length > 0,
+          source_count: relevantChunks.length,
+          ip_address: req.ip,
+          user_agent: req.headers.get("user-agent") || undefined,
+        });
+      }
 
       return NextResponse.json(chatResponse);
     } catch (serviceError) {
@@ -379,13 +397,15 @@ This is the detailed explanation that expands on the bullet points above. It sho
       });
 
       // Log error case
-      await logQuestion({
-        question: query,
-        processing_time: Date.now() - startTime,
-        error_message: errorMessage,
-        ip_address: req.ip,
-        user_agent: req.headers.get("user-agent") || undefined,
-      });
+      if (logQuestion) {
+        await logQuestion({
+          question: query,
+          processing_time: Date.now() - startTime,
+          error_message: errorMessage,
+          ip_address: req.ip,
+          user_agent: req.headers.get("user-agent") || undefined,
+        });
+      }
 
       // Return a helpful fallback response with more specific error info
       return NextResponse.json({
@@ -398,7 +418,7 @@ This is the detailed explanation that expands on the bullet points above. It sho
     console.error("Chat API error:", error);
 
     // Log error case if we have a query
-    if (query) {
+    if (query && logQuestion) {
       await logQuestion({
         question: query,
         processing_time: Date.now() - startTime,
