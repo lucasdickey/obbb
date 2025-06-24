@@ -1,6 +1,31 @@
-# HR1 Semantic Q&A Assistant
+# OB3.chat HR1 Assistant
 
 A web-based chat interface that allows natural language querying of the HR1 legislative bill using AI-powered semantic search and retrieval-augmented generation (RAG).
+
+## What's New (June 2025)
+
+### UI/UX Improvements
+- **Modern, Compact UI**: Chat and landing interface redesigned for a compact, single-page fit.
+- **Color Scheme**: Updated to a peach/yellow/black palette for accessibility (replaces original blue).
+- **User Prompt Styling**: User prompts are visually distinct, left-aligned, and do not have a copy icon.
+- **AI Response Structure**: Each answer is structured as: bullet summary → prose summary → citations.
+- **Copy-to-Clipboard**: Copying an answer also copies the user's question; improved logic and placement of copy buttons.
+- **Loading Indicator**: Animated ellipsis and a yellow-dot Lucide spinner for loading state.
+- **Citations**: Collapsed by default, expandable with Lucide icons. Copy button moved to the upper right of each source. Pill-shaped containers for bullet numbers (bold, no shading) and relevancy scores (distinct color).
+- **Input Field**: Improved spacing between input and Send button.
+- **General Spacing**: Reduced padding/margins and font sizes for a denser, more accessible layout.
+- **Accessibility**: Improved color contrast and keyboard navigation.
+
+### State-Specific Impact Analysis (NEW)
+- **🏛️ State Filtering**: Users can filter HR1 provisions by how they impact their specific state
+- **🔍 Smart Classification**: AI-powered analysis identifies state-specific impacts in bill text
+- **💰 Cost-Optimized Pipeline**: Pre-filtering reduces processing by 40-60%, keeping costs under $1
+- **📊 Comprehensive Coverage**: Analysis covers funding, infrastructure, jobs, regulations, and economic impacts
+- **⚡ Batch Processing**: Efficient GPT-4o-mini classification with caching and resumability
+- **📈 Impact Tracking**: Detailed analytics on which states are most affected by different provisions
+
+### Technical Improvements
+- **Removed Files**: `test-api.js` and `test-pinecone.js` have been deleted.
 
 ## Project Overview
 
@@ -20,10 +45,18 @@ This application provides an intelligent Q&A interface for exploring the "For th
 
 - 🤖 AI-powered question answering about HR1
 - 🔍 Semantic search through bill content
-- 📱 Responsive chat interface
-- 📖 Citation traceability with source references
-- ⚡ Real-time streaming responses
-- 🎯 Contextually relevant answers
+- 🏛️ **State-specific filtering** to find provisions impacting your state
+- 📱 Responsive, compact, and accessible chat interface
+- 🎨 Peach/yellow/black color scheme for high accessibility
+- 💬 User prompts are visually distinct and left-aligned
+- 📝 AI answers structured as bullet summary, prose, and citations
+- 📋 Copy-to-clipboard for both question and answer
+- 📖 Citation traceability with source references, collapsed by default and expandable
+- ⚡ Real-time streaming responses with animated loading indicator
+- 🎯 Contextually relevant answers with pill-shaped relevancy scores
+- 🏷️ Pill-shaped, bold bullet numbers (no shading)
+- 🖱️ Lucide icons for expand/collapse and copy actions
+- 📊 **State impact analytics** showing which provisions affect different states
 
 ## Getting Started
 
@@ -123,6 +156,13 @@ hr1-semantic-qa/
 - `npm run ingest` - Process and embed HR1 text
 - `npm run ingest:dry-run` - Test ingestion without API calls
 
+### State Impact Analysis Scripts
+- `tsx scripts/classify_state_impacts.ts --review --limit=10` - Review sample chunks before processing
+- `tsx scripts/classify_state_impacts.ts --dry-run` - Test state classification pipeline without API calls
+- `tsx scripts/classify_state_impacts.ts --limit=20` - Run classification on limited subset (e.g., 20 chunks)
+- `tsx scripts/classify_state_impacts.ts` - Run full state impact classification
+- `tsx scripts/classify_state_impacts.ts --update-metadata` - Update Pinecone with state metadata
+
 ### Architecture
 
 The application follows a standard RAG (Retrieval-Augmented Generation) pattern:
@@ -174,63 +214,3 @@ This project is optimized for Vercel deployment with included `vercel.json` conf
    ```
    NEXT_PUBLIC_APP_URL=https://yourdomain.com
    ```
-
-4. **Deploy**
-
-   Push to your main branch or run:
-
-   ```bash
-   vercel --prod
-   ```
-
-#### Pre-Deploy Checklist
-
-- [ ] All environment variables configured
-- [ ] Pinecone index created and populated with HR1 data
-- [ ] Build passes: `npm run build`
-- [ ] TypeScript checks pass: `npm run type-check`
-- [ ] No console errors in production build
-
-### Other Platforms
-
-The application can be deployed on any platform supporting Node.js:
-
-- **Netlify**: Use the `npm run build` command
-- **Railway**: Automatic deployments from Git
-- **Render**: Configure build command as `npm run build`
-
-### Production Considerations
-
-- **Rate Limiting**: Configure Upstash Redis for production rate limiting
-- **Monitoring**: Set up error tracking (Sentry, etc.)
-- **Analytics**: Add usage analytics if needed
-- **CORS**: Configure if serving from different domains
-
-## API Endpoints
-
-- `POST /api/chat` - Main chat endpoint for Q&A
-- Additional endpoints for health checks and monitoring (planned)
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
-
-## Acknowledgments
-
-- HR1 bill text from GovTrack.us
-- Built with Vercel AI SDK
-- Powered by OpenAI and Pinecone
-- Built by Apes On Keys with Lucas Dickey driving
-- MIT License Lucas Dickey 2025
-
-# Force deploy Tue Jun 10 20:04:24 PDT 2025
-
-# Remove auth protection Tue Jun 10 20:47:55 PDT 2025

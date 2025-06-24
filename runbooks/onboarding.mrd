@@ -4,7 +4,7 @@
 Help new contributors ramp up quickly and follow project standards.
 
 ## Steps
-- [ ] Read AGENTS.md and TASKS.md to understand the stack, workflow, and best practices
+- [ ] Read AGENTS.md and/or TASKS.md to understand the stack, workflow, and best practices
 - [ ] Set up your local environment (Node.js, npm, Vercel CLI, etc.)
 - [ ] Clone the repository and run `npm install`
 - [ ] Request access to required secrets and configuration (GitHub Actions secrets, Vercel, API keys)

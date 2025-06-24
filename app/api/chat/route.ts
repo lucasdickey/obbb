@@ -89,6 +89,19 @@ async function initializeRateLimit() {
   return ratelimit;
 }
 
+async function initializeSupabase() {
+  try {
+    if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY && 
+        !process.env.SUPABASE_URL.includes('your_supabase_url_here')) {
+      const { logQuestion } = await import("@/lib/supabase");
+      return logQuestion;
+    }
+  } catch (error) {
+    console.error("Failed to initialize Supabase:", error);
+  }
+  return null;
+}
+
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
@@ -116,6 +129,8 @@ interface ChatResponse {
 
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
+  let query: string = ""; // Declare query at the top level
+  let logQuestion: any = null; // Declare logQuestion at the top level
 
   try {
     // Rate limiting (optional)
@@ -151,12 +166,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const query = userMessage.content.trim();
+    query = userMessage.content.trim();
     if (!query || query.length > 1000) {
       return NextResponse.json(
         { error: "Query must be between 1 and 1000 characters" },
         { status: 400 }
       );
+    }
+
+    // Log the question immediately if Supabase is available
+    logQuestion = await initializeSupabase();
+    if (logQuestion) {
+      await logQuestion({
+        question: query,
+        ip_address: req.ip,
+        user_agent: req.headers.get("user-agent") || undefined,
+      });
     }
 
     // Check if AI services are available
@@ -167,18 +192,6 @@ export async function POST(req: NextRequest) {
     // Configurable toggle: PREFER_GROQ=true means Groq first, OpenAI fallback
     // PREFER_GROQ=false means OpenAI first, Groq fallback
     const preferGroq = process.env.PREFER_GROQ === "true";
-
-    // Debug logging for production issues
-    console.log("Service availability check:", {
-      hasOpenAI,
-      hasPinecone,
-      hasGroq,
-      preferGroq,
-      openaiKeyPrefix: process.env.OPENAI_API_KEY?.substring(0, 8) || "missing",
-      pineconeKeyPrefix:
-        process.env.PINECONE_API_KEY?.substring(0, 8) || "missing",
-      groqKeyPrefix: process.env.GROQ_API_KEY?.substring(0, 8) || "missing",
-    });
 
     if (!hasOpenAI || !hasPinecone) {
       return NextResponse.json({
@@ -226,15 +239,14 @@ export async function POST(req: NextRequest) {
 
       if (relevantChunks.length === 0) {
         return NextResponse.json({
-          response:
-            "I couldn't find relevant information in the HR1 bill to answer your question. Please try rephrasing your question or asking about a different aspect of the bill.",
+          response: "I couldn't find relevant information in the HR1 bill to answer your question. Please try rephrasing your question or asking about a different aspect of the bill.",
           sources: [],
           processingTime: Date.now() - startTime,
         });
       }
 
       // Step 4: Generate response with configurable primary/fallback
-      const prompt = `You are a helpful assistant answering questions about the HR1 "One Big Beautiful Bill Act" (119th Congress). 
+      const prompt = `You are a helpful assistant answering questions about the HR1 "One Big Beautiful Bill Act" (119th Congress).
 
 Based on the following relevant excerpts from the bill, provide a comprehensive answer with this EXACT structure:
 
@@ -258,8 +270,7 @@ EXAMPLE FORMAT:
 
 This is the detailed explanation that expands on the bullet points above. It should be written in paragraph form without any bullet points, providing comprehensive context and analysis based on the excerpts provided.`;
 
-      const systemMessage =
-        "You are a knowledgeable legislative assistant. You MUST follow the exact format: emoji bullet points first (each starting with an emoji), then a blank line, then prose explanation. Never mix bullets and prose together. Do not include any <think> tags or reasoning steps in your response - only provide the final answer.";
+      const systemMessage = "You are a knowledgeable legislative assistant. You MUST follow the exact format: emoji bullet points first (each starting with an emoji), then a blank line, then prose explanation. Never mix bullets and prose together. Do not include any <think> tags or reasoning steps in your response - only provide the final answer.";
 
       let completion;
       let usedProvider = "";
@@ -280,7 +291,7 @@ This is the detailed explanation that expands on the bullet points above. It sho
           });
           usedProvider = "Groq (DeepSeek-R1)";
         } catch (groqError) {
-          console.log("Groq failed, falling back to OpenAI:", groqError);
+          console.error("Groq failed, falling back to OpenAI:", groqError);
           try {
             completion = await openaiClient.chat.completions.create({
               model: "gpt-4o-mini",
@@ -315,7 +326,7 @@ This is the detailed explanation that expands on the bullet points above. It sho
           usedProvider = "OpenAI";
         } catch (openaiError) {
           if (hasGroq) {
-            console.log("OpenAI failed, falling back to Groq:", openaiError);
+            console.error("OpenAI failed, falling back to Groq:", openaiError);
             try {
               const groqClient = await initializeGroq();
               completion = await groqClient.chat.completions.create({
@@ -357,6 +368,19 @@ This is the detailed explanation that expands on the bullet points above. It sho
         provider: usedProvider, // Add provider info for debugging
       };
 
+      // After successful response, update the log with additional info
+      if (logQuestion) {
+        await logQuestion({
+          question: query,
+          processing_time: Date.now() - startTime,
+          provider: usedProvider,
+          has_sources: relevantChunks.length > 0,
+          source_count: relevantChunks.length,
+          ip_address: req.ip,
+          user_agent: req.headers.get("user-agent") || undefined,
+        });
+      }
+
       return NextResponse.json(chatResponse);
     } catch (serviceError) {
       console.error("AI service error:", serviceError);
@@ -372,6 +396,17 @@ This is the detailed explanation that expands on the bullet points above. It sho
         query: query,
       });
 
+      // Log error case
+      if (logQuestion) {
+        await logQuestion({
+          question: query,
+          processing_time: Date.now() - startTime,
+          error_message: errorMessage,
+          ip_address: req.ip,
+          user_agent: req.headers.get("user-agent") || undefined,
+        });
+      }
+
       // Return a helpful fallback response with more specific error info
       return NextResponse.json({
         response: `I encountered an issue while processing your question about "${query}". Error: ${errorMessage}. This might be due to API rate limits or temporary service unavailability. Please try again in a moment.`,
@@ -381,6 +416,17 @@ This is the detailed explanation that expands on the bullet points above. It sho
     }
   } catch (error) {
     console.error("Chat API error:", error);
+
+    // Log error case if we have a query
+    if (query && logQuestion) {
+      await logQuestion({
+        question: query,
+        processing_time: Date.now() - startTime,
+        error_message: error instanceof Error ? error.message : String(error),
+        ip_address: req.ip,
+        user_agent: req.headers.get("user-agent") || undefined,
+      });
+    }
 
     // Return appropriate error response
     if (error instanceof Error) {
